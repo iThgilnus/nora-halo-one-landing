@@ -12,9 +12,7 @@ def get_chat_init():
         "welcome_message": "Xin chào Sen! 🐾 Mình là Trợ lý ảo của NORA. Mình có thể giúp Sen tìm hiểu thông tin sản phẩm, cách huấn luyện mèo dùng máy hay các thông số kỹ thuật của NORA Halo One. Sen cần hỗ trợ gì hôm nay ạ?",
         "suggestions": [
             "Halo One có chống kẹt an toàn không?",
-            "Bao lâu cần dọn khay chứa chất thải?",
-            "Loại cát nào phù hợp cho máy?",
-            "Chính sách bảo hành và lắp đặt thế nào?"
+            "Bao lâu cần dọn khay chứa chất thải?"
         ]
     }
 

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef, FormEvent } from "react";
+import { useState, useEffect, useRef, FormEvent, useCallback, useLayoutEffect } from "react";
+import { flushSync } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Bot, Sparkles, Cat, AlertCircle, Trash2 } from "lucide-react";
+import { MessageCircle, X, Send, Bot, Trash2 } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import styles from "./Chatbot.module.scss";
 
@@ -70,6 +71,24 @@ export function Chatbot() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
+  const focusInput = useCallback(() => {
+    const textarea = inputRef.current;
+    if (!textarea || textarea.disabled) return;
+
+    textarea.focus({ preventScroll: true });
+    const cursorPosition = textarea.value.length;
+    textarea.setSelectionRange(cursorPosition, cursorPosition);
+  }, []);
+
+  const resizeInput = useCallback(() => {
+    const textarea = inputRef.current;
+    if (!textarea) return;
+
+    textarea.style.height = "auto";
+    const nextHeight = Math.min(textarea.scrollHeight, 120);
+    textarea.style.height = `${nextHeight}px`;
+  }, []);
+
   // 1. Khôi phục lịch sử chat từ sessionStorage và tải cấu hình từ backend
   useEffect(() => {
     const savedMessages = sessionStorage.getItem("nora-chat-messages");
@@ -122,24 +141,30 @@ export function Chatbot() {
 
   // 4. Focus vào input khi mở khung chat
   useEffect(() => {
-    if (isOpen && inputRef.current) {
-      setTimeout(() => inputRef.current?.focus(), 100);
-    }
-  }, [isOpen]);
+    if (!isOpen) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      resizeInput();
+      focusInput();
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [focusInput, isOpen, resizeInput]);
 
   // 5. Tự động mở rộng chiều cao textarea khi câu dài
-  useEffect(() => {
-    const textarea = inputRef.current;
-    if (!textarea) return;
-    
-    textarea.style.height = "24px";
-    const nextHeight = Math.min(textarea.scrollHeight, 120);
-    textarea.style.height = `${nextHeight}px`;
-  }, [input]);
+  useLayoutEffect(() => {
+    resizeInput();
+  }, [input, isOpen, resizeInput]);
 
   const toggleChat = () => {
     const nextOpen = !isOpen;
-    setIsOpen(nextOpen);
+    if (nextOpen) {
+      flushSync(() => setIsOpen(true));
+      resizeInput();
+      focusInput();
+    } else {
+      setIsOpen(false);
+    }
     
     if (nextOpen && !hasOpenedBefore) {
       setHasOpenedBefore(true);
@@ -152,7 +177,7 @@ export function Chatbot() {
     if (!trimmedText || isLoading) return;
 
     // Ghi nhận sự kiện gửi tin nhắn
-    trackEvent("chat_message_sent" as any, "chat", { length: trimmedText.length });
+    trackEvent("chat_message_sent", "chat", { length: trimmedText.length });
 
     // Thêm tin nhắn của User vào feed
     const userMessage: ChatMessage = { role: "user", content: trimmedText };
@@ -183,7 +208,7 @@ export function Chatbot() {
       setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
       setIsLoading(false); // Ẩn Typing Loader khi bắt đầu nhận chữ
 
-      let assistantMessage = "";
+      const assistantMessageParts: string[] = [];
       let buffer = "";
 
       while (true) {
@@ -211,7 +236,8 @@ export function Chatbot() {
             try {
               const parsed = JSON.parse(dataText);
               if (parsed.text) {
-                assistantMessage += parsed.text;
+                assistantMessageParts.push(parsed.text);
+                const assistantMessage = assistantMessageParts.join("");
                 // Cập nhật ký tự nhận được vào bubble cuối cùng
                 setMessages((prev) => {
                   const copy = [...prev];
@@ -219,7 +245,7 @@ export function Chatbot() {
                   return copy;
                 });
               }
-            } catch (jsonErr) {
+            } catch {
               // Bỏ qua lỗi parse của các gói dữ liệu bị cắt dở
             }
           }
@@ -257,7 +283,7 @@ export function Chatbot() {
 
   const handleClearChat = () => {
     if (isLoading) return;
-    trackEvent("chat_cleared" as any, "chat", {});
+    trackEvent("chat_cleared", "chat", {});
     sessionStorage.removeItem("nora-chat-messages");
     
     fetch("/api/chat/init")
