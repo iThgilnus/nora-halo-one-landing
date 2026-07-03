@@ -68,8 +68,36 @@ export function Chatbot() {
   const [isLoading, setIsLoading] = useState(false);
   const [hasOpenedBefore, setHasOpenedBefore] = useState(false);
   
+  const containerRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const scrollToBottom = useCallback(() => {
+    const messageList = scrollRef.current;
+    if (!messageList) return;
+
+    messageList.scrollTop = messageList.scrollHeight;
+  }, []);
+
+  const syncMobileViewport = useCallback(() => {
+    const container = containerRef.current;
+    if (!container || typeof window === "undefined") return;
+
+    const viewport = window.visualViewport;
+    const viewportHeight = viewport?.height ?? window.innerHeight;
+    const viewportOffsetTop = viewport?.offsetTop ?? 0;
+    const keyboardInset = Math.max(0, window.innerHeight - viewportHeight - viewportOffsetTop);
+
+    container.style.setProperty("--chat-viewport-height", `${viewportHeight}px`);
+    container.style.setProperty("--chat-viewport-offset-top", `${viewportOffsetTop}px`);
+    container.style.setProperty("--chat-keyboard-inset", `${keyboardInset}px`);
+  }, []);
+
+  const shouldAutoFocus = useCallback(() => {
+    if (typeof window === "undefined") return false;
+
+    return window.matchMedia("(min-width: 768px) and (hover: hover) and (pointer: fine)").matches;
+  }, []);
 
   const focusInput = useCallback(() => {
     const textarea = inputRef.current;
@@ -134,34 +162,86 @@ export function Chatbot() {
 
   // 3. Tự động cuộn xuống cuối khung chat khi có tin nhắn mới
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages, isLoading]);
+    scrollToBottom();
+  }, [messages, isLoading, scrollToBottom]);
 
   // 4. Focus vào input khi mở khung chat
+  useEffect(() => {
+    if (!isOpen || typeof window === "undefined") return;
+
+    const handleViewportChange = () => {
+      syncMobileViewport();
+      window.requestAnimationFrame(scrollToBottom);
+    };
+
+    handleViewportChange();
+    window.addEventListener("resize", handleViewportChange);
+    window.visualViewport?.addEventListener("resize", handleViewportChange);
+    window.visualViewport?.addEventListener("scroll", handleViewportChange);
+
+    return () => {
+      window.removeEventListener("resize", handleViewportChange);
+      window.visualViewport?.removeEventListener("resize", handleViewportChange);
+      window.visualViewport?.removeEventListener("scroll", handleViewportChange);
+    };
+  }, [isOpen, scrollToBottom, syncMobileViewport]);
+
+  useEffect(() => {
+    if (!isOpen || typeof window === "undefined") return;
+
+    const isMobile = window.matchMedia("(max-width: 640px)").matches;
+    if (!isMobile) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpen]);
+
   useEffect(() => {
     if (!isOpen) return;
 
     const frame = window.requestAnimationFrame(() => {
+      syncMobileViewport();
       resizeInput();
-      focusInput();
+      if (shouldAutoFocus()) {
+        focusInput();
+      }
     });
 
     return () => window.cancelAnimationFrame(frame);
-  }, [focusInput, isOpen, resizeInput]);
+  }, [focusInput, isOpen, resizeInput, shouldAutoFocus, syncMobileViewport]);
 
   // 5. Tự động mở rộng chiều cao textarea khi câu dài
   useLayoutEffect(() => {
     resizeInput();
-  }, [input, isOpen, resizeInput]);
+    scrollToBottom();
+  }, [input, isOpen, resizeInput, scrollToBottom]);
+
+  const settleInputViewport = () => {
+    syncMobileViewport();
+    window.requestAnimationFrame(() => {
+      syncMobileViewport();
+      scrollToBottom();
+    });
+
+    window.setTimeout(() => {
+      syncMobileViewport();
+      scrollToBottom();
+    }, 250);
+  };
 
   const toggleChat = () => {
     const nextOpen = !isOpen;
     if (nextOpen) {
       flushSync(() => setIsOpen(true));
+      syncMobileViewport();
       resizeInput();
-      focusInput();
+      if (shouldAutoFocus()) {
+        focusInput();
+      }
     } else {
       setIsOpen(false);
     }
@@ -298,7 +378,10 @@ export function Chatbot() {
   };
 
   return (
-    <div className={styles.chatbotContainer}>
+    <div
+      ref={containerRef}
+      className={`${styles.chatbotContainer} ${isOpen ? styles.chatbotContainerOpen : ""}`}
+    >
       {/* Khung chat sử dụng AnimatePresence để làm mượt transition đóng/mở */}
       <AnimatePresence>
         {isOpen && (
@@ -380,6 +463,7 @@ export function Chatbot() {
                   placeholder="Nhập câu hỏi của Sen..."
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
+                  onFocus={settleInputViewport}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
