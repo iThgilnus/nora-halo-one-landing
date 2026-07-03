@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NORA Halo One - ChromaDB Chunks Dashboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --bg-dark: #0b0f19;
+            --card-bg: rgba(17, 24, 39, 0.7);
+            --accent-lime: #adff2f;
+            --accent-lime-rgb: 173, 255, 47;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --header-gradient: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            padding: 2.5rem;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(var(--accent-lime-rgb), 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(30, 58, 138, 0.15) 0px, transparent 50%);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .logo-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: #ffffff;
+        }
+        
+        .logo-title h1 span {
+            color: var(--accent-lime);
+        }
+        
+        .logo-title p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+        
+        .stats-badge {
+            background: rgba(var(--accent-lime-rgb), 0.1);
+            border: 1px solid rgba(var(--accent-lime-rgb), 0.3);
+            color: var(--accent-lime);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .search-box {
+            flex: 1;
+            position: relative;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 0.875rem 1rem 0.875rem 2.75rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            color: white;
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+        
+        .search-box input:focus {
+            border-color: var(--accent-lime);
+            box-shadow: 0 0 12px rgba(var(--accent-lime-rgb), 0.15);
+        }
+        
+        .search-box::before {
+            content: "🔍";
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1rem;
+            opacity: 0.5;
+        }
+        
+        .filter-select {
+            padding: 0.875rem 1.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            color: white;
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            cursor: pointer;
+        }
+        
+        .filter-select option {
+            background: var(--bg-dark);
+            color: white;
+        }
+        
+        .chunks-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+        
+        .chunk-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            backdrop-filter: blur(12px);
+            transition: all 0.25s ease;
+        }
+        
+        .chunk-card:hover {
+            border-color: rgba(var(--accent-lime-rgb), 0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .chunk-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            padding-bottom: 0.75rem;
+        }
+        
+        .chunk-title {
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: #ffffff;
+        }
+        
+        .chunk-meta {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+        
+        .badge-page {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .badge-id {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-family: monospace;
+        }
+        
+        .chunk-body {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #cbd5e1;
+            white-space: pre-wrap;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            border: 1px dashed var(--border-color);
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.01);
+        }
+        
+        .highlight {
+            background: rgba(var(--accent-lime-rgb), 0.2);
+            color: var(--accent-lime);
+            padding: 0 2px;
+            border-radius: 2px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-title">
+                <h1>NORA Halo One <span>Vector Dashboard</span></h1>
+                <p>Hiển thị chi tiết tất cả các phân mảnh tài liệu (semantic chunks) trong cơ sở dữ liệu ChromaDB</p>
+            </div>
+            <div class="stats-badge" id="statsBadge">
+                Đang tải...
+            </div>
+        </header>
+        
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Tìm kiếm nội dung chunk hoặc từ khóa..." oninput="filterChunks()">
+            </div>
+            <select id="pageFilter" class="filter-select" onchange="filterChunks()">
+                <option value="all">Tất cả các trang</option>
+            </select>
+        </div>
+        
+        <div class="chunks-list" id="chunksContainer">
+            <!-- Chunks will be dynamically rendered here -->
+        </div>
+    </div>
+
+    <script>
+        const chunks = [{"id": "b08f992b-48b3-412c-b9cf-14b4946a2ce2", "content": "SỔ TAY HƯỚNG DẪN VẬN HÀNH & BẢO TRÌ\n THIẾT BỊ\n HỘP VỆ SINH MÈO THÔNG MINH TỰ ĐỘNG\n NORA HALO ONE\n Tài liệu Vận hành Toàn diện, Hướng dẫn Kỹ thuật và Quy định CSKH Chính thức\n Mã tài liệu: MAN-NORA-HALO1-V1.2 | Phát hành bởi NORA Customer Service Team\n BẢN QUYỀN THUỘC VỀ CÔNG TY CÔNG NGHỆ NORA VIỆT NAM", "title": "Tài liệu Trang 1: SỔ TAY HƯỚNG DẪN VẬN HÀNH & BẢO...", "page": 1}, {"id": "279499fd-d901-419b-a064-7425e3cd9527", "content": "1. Cấu tạo vật lý thiết bị\n• Cabin xoay (Drum): Dung tích 65 Lít làm bằng nhựa ABS kháng khuẩn mật độ cao, giảm thiểu mảng bám và\nchống trầy xước từ móng vuốt mèo. • Đệm làm kín (NORA Seal): Vòng silicon đúp lắp tại cửa khay chứa, tạo áp lực khép kín khi khay đóng để cô lập\nhoàn toàn mùi chất thải. • Lưới lọc cát thông minh: Mắt lưới 1.2 cm giúp lọc và tách hiệu quả các loại cát vón cục khỏi cát sạch một cách\nnhẹ nhàng.", "title": "Tài liệu Trang 2: 1. Cấu tạo vật lý thiết bị •...", "page": 2}, {"id": "e1d1f8fb-7358-486b-9130-889c9d326209", "content": "2. Các thông số kỹ thuật tiêu chuẩn\n• Trọng lượng mèo hỗ trợ: Thiết bị được thiết kế tối ưu và khuyến nghị hỗ trợ mèo có cân nặng từ 1.5 kg đến\ntối đa 10.0 kg. • Độ ồn khi dọn dẹp: Động cơ giảm tốc bánh răng hành tinh thế hệ mới giúp máy vận hành siêu êm với độ\nồn cực thấp ≤ 36 dB không làm ảnh hưởng tới sinh hoạt gia đình. • Khay chứa chất thải: Thể tích hộp chứa chất thải lớn 8 L (tự gom túi kín mùi) giúp lưu trữ rác thải lên đến\n15 ngày liên tục. • Hệ thống Camera AI: Camera mắt cá NORA Vision góc rộng 200 độ ghi hình Full HD 1080p, trang bị 6 đèn\nLED hồng ngoại ẩn 940nm hỗ trợ quan sát ban đêm rõ nét. • Mạng kết nối không dây: Hỗ trợ kết nối Wi-Fi băng tần 2.4 GHz và Bluetooth giúp thiết lập cài đặt nhanh\nchóng trên ứng dụng NORA App. • Kích thước vật lý và Trọng lượng máy: Kích thước chi tiết của thiết bị là 520 x 540 x 655 mm (tương ứng\nRộng x Sâu x Cao), tổng trọng lượng tịnh của máy là 12.5 kg.", "title": "Tài liệu Trang 2: 2. Các thông số kỹ thuật tiêu chuẩn...", "page": 2}, {"id": "c9d60011-1116-4684-ad69-28e2783e32bb", "content": "CHƯƠNG I: CẤU TẠO CHI TIẾT & THÔNG SỐ KỸ THUẬT\nHộp vệ sinh mèo tự động thông minh NORA Halo One là bước đột phá kết hợp giữa công nghệ cao và triết lý\nthiết kế organic. Sản phẩm được tối ưu hóa cho không gian sống hiện đại, giúp khử mùi triệt để và tự động hóa\nchu trình vệ sinh cho thú cưng.", "title": "Tài liệu Trang 2: CHƯƠNG I: CẤU TẠO CHI TIẾT & THÔNG...", "page": 2}, {"id": "5060c87d-86c0-4b33-b10b-19a05818f428", "content": "• Công suất định mức và Nguồn điện: Máy tiêu thụ công suất định mức 24 W sử dụng bộ nguồn Adapter\nđầu vào 12V - 2A đầu cắm DC đi kèm. • Cát tương thích tốt nhất: Máy sử dụng tốt nhất với cát đất sét vón cục (bentonite), cát đậu nành hạt\nnhuyễn (tofu) đường kính dưới 2mm, cát hỗn hợp hữu cơ vón nhanh. Khuyến cáo tránh xa cát thủy tinh\nkhông vón hoặc cát gỗ hạt thô vì gây kẹt lưới lọc. CHƯƠNG II: HƯỚNG DẪN LẮP ĐẶT & KẾT NỐI ỨNG DỤNG NORA\nĐể thiết bị hoạt động chính xác, quy trình lắp đặt cần tuân thủ nghiêm ngặt các hướng dẫn về mặt sàn và kết nối\nmạng.", "title": "Tài liệu Trang 2: • Công suất định mức và Nguồn điện:...", "page": 2}, {"id": "e3283fb8-0bb9-4afd-a7f0-c60ee0ff0908", "content": "1. Vị trí đặt thiết bị tối ưu\nĐặt thiết bị trên bề mặt phẳng, cứng và vững chãi (như sàn gạch, sàn gỗ phẳng). Tuyệt đối không đặt máy lên\nthảm dày hoặc thảm lông xốp có độ dày trên 0.5 cm. Lớp thảm mềm sẽ làm giảm lực truyền đến cảm biến trọng\nlực đặt dưới 4 chân máy, dẫn đến sai lệch thông tin đo cân nặng hoặc làm chậm trễ cơ chế ngắt an toàn của\nNORA Guard. Đặt máy cách tường ít nhất 10 cm ở mọi phía để tránh va chạm khi cabin xoay dọn cát.", "title": "Tài liệu Trang 3: 1. Vị trí đặt thiết bị tối ưu...", "page": 3}, {"id": "447dc865-aac2-4a0f-bffb-fb1cd645e26b", "content": "2. Các bước kết nối NORA App\nBước 1: Cắm bộ nguồn Adapter 12V-2A đi kèm vào nguồn điện sinh hoạt ổn định. Bước 2: Nhấn giữ phím nguồn trên thân máy trong 5 giây cho đến khi đèn tín hiệu LED nháy chậm màu\nxanh dương (trạng thái sẵn sàng kết nối). Bước 3: Bật Bluetooth và kết nối Wi-Fi trên điện thoại (đảm bảo mạng 2.4 GHz hoạt động, máy không hỗ trợ\ncác mạng Wi-Fi doanh nghiệp yêu cầu đăng nhập trang web trung gian). Bước 4: Mở ứng dụng NORA App, chọn nút 'Thêm thiết bị' (+), ứng dụng sẽ tự động phát hiện thiết bị qua\nBluetooth. Chọn kết nối và điền mật khẩu Wi-Fi của bạn.", "title": "Tài liệu Trang 3: 2. Các bước kết nối NORA App Bước...", "page": 3}, {"id": "7042f559-6e25-45c2-887e-84e4c168d19e", "content": "Bước 5: Dán tem QR code định danh thiết bị vào nắp bên của máy để dễ dàng truy xuất thông tin hỗ trợ kỹ\nthuật sau này.", "title": "Tài liệu Trang 3: Bước 5: Dán tem QR code định danh...", "page": 3}, {"id": "bbb1daec-673b-48e5-b5fa-6267c5b6893c", "content": "2. Cảnh báo an toàn mèo con dưới 3 tháng tuổi\nĐẶC BIỆT QUAN TRỌNG: Đối với mèo con dưới 3 tháng tuổi, mèo đang mang thai hoặc có trọng lượng nhỏ hơn\n1.5 kg, chủ nuôi BẮT BUỘC phải tắt chế độ dọn dẹp tự động trên ứng dụng. Chuyển thiết bị sang chế độ 'Dọn thủ\ncông' (Manual Mode).", "title": "Tài liệu Trang 4: 2. Cảnh báo an toàn mèo con dưới...", "page": 4}, {"id": "b7b201e5-538f-44b6-8e93-20c6eee0c22e", "content": "CHƯƠNG III: QUY TẮC VẬN HÀNH AN TOÀN & CẢNH BÁO AN TOÀN\nMÈO CON\nAn toàn của thú cưng là ưu tiên số một của NORA. Hệ thống cảm biến NORA Guard hoạt động liên tục nhằm\nbảo vệ tối đa cho các boss. 1. Cơ chế cảm biến an toàn NORA Guard\nNORA Guard là sự kết hợp của 10 điểm cảm biến bao gồm cảm biến trọng lực đo tải trọng cabin, cảm biến hồng\nngoại cửa vào phát hiện vật cản, và rada vi sóng quét chuyển động trong bán kính 1.5 mét trước lối vào. Chu\ntrình dọn dẹp cát tự động sẽ chỉ bắt đầu khi cabin được xác định là trống hoàn toàn và không có chuyển động\nnào trong khu vực an toàn xung quanh máy trong ít nhất 5 phút.", "title": "Tài liệu Trang 4: CHƯƠNG III: QUY TẮC VẬN HÀNH AN TOÀN...", "page": 4}, {"id": "9dbb44bb-ee32-4034-8a47-7bec1d6f026c", "content": "Nếu phát hiện bất kỳ sự hiện diện nào trong lúc\nmáy đang quay dọn dẹp, máy sẽ ngay lập tức phanh dừng khẩn cấp và phát tiếng bíp cảnh báo, đồng thời gửi\nthông báo đẩy đến điện thoại chủ nuôi qua NORA App.", "title": "Tài liệu Trang 4: Nếu phát hiện bất kỳ sự hiện diện...", "page": 4}, {"id": "3de127b9-02e9-43e5-a1af-d0b9c6b8f1e5", "content": "Ở chế độ này, máy sẽ không tự xoay dọn sau khi mèo rời đi. Khi thấy mèo đã đi vệ sinh và\ndi chuyển ra xa thiết bị, chủ nuôi sẽ thực hiện dọn dẹp bằng cách bấm nút 'Clean' vật lý trên thân máy hoặc bấm\nnút 'Dọn dẹp ngay' trong ứng dụng NORA App. Quy tắc này giúp ngăn ngừa mọi rủi ro đáng tiếc do cơ thể mèo\ncon quá nhẹ không kích hoạt được cảm biến trọng lực ở chân đế. CHƯƠNG IV: QUY TRÌNH BẢO TRÌ, VỆ SINH & BẢO DƯỠNG ĐỊNH KỲ\nVệ sinh đúng cách và bảo dưỡng định kỳ giúp máy Halo One vận hành êm ái, tăng tuổi thọ và giữ cho không\ngian phòng luôn thơm mát. 1. Dọn khay chứa chất thải (15 ngày/lần)\nKhi khay chứa chất thải đầy (hoặc sau mỗi 15 ngày sử dụng với 1 mèo; từ 7 đến 10 ngày sử dụng với 2 mèo; và\nsau mỗi 5 ngày đối với từ 3 mèo trở lên), ứng dụng NORA App sẽ báo đỏ và đèn LED trên máy nháy cảnh báo. Hãy thực hiện rút khay chứa ra. Cơ chế túi rút NORA Seal tự động thắt miệng túi lại để bụi bẩn và mùi hôi không\nthoát ra ngoài. Vứt bỏ túi rác cũ, lắp túi đựng chất thải NORA chuyên dụng mới vào khay, căn chỉnh phẳng bốn\ngóc và đẩy khay vào vị trí khớp ban đầu.", "title": "Tài liệu Trang 4: Ở chế độ này, máy sẽ không tự...", "page": 4}, {"id": "799d3639-aa20-4439-aba5-853de88cfe62", "content": "2. Vệ sinh tổng thể Cabin xoay (30 ngày/lần)\n• Đổ toàn bộ cát cũ trong cabin ra bằng cách chọn chế độ 'Đổ cát' (Empty Litter) trên ứng dụng hoặc nhấn đúp\nnút nguồn. • Tháo khóa an toàn phía sau và nhấc cabin xoay ra khỏi đế máy.", "title": "Tài liệu Trang 5: 2. Vệ sinh tổng thể Cabin xoay (30...", "page": 5}, {"id": "400dcb91-6609-46a8-b819-0f0175302991", "content": "• Cabin xoay có thể ngâm nước rửa sạch bằng xà phòng trung tính và bàn chải mềm. Hãy rửa sạch các cặn bẩn\nbám trên lưới lọc và sàn cao su. • CẢNH BÁO NGUY HIỂM: Phần đế máy chứa động cơ, hệ thống bánh răng truyền động và bo mạch điều khiển\ntuyệt đối KHÔNG ĐƯỢC RỬA NƯỚC. Chỉ sử dụng khăn ẩm vắt khô để lau chùi bụi bẩn bám trên bề mặt đế. • Để cabin khô tự nhiên hoàn toàn trước khi lắp lại vào đế máy để tránh ẩm ướt làm hỏng linh kiện điện tử bên\ntrong.", "title": "Tài liệu Trang 5: • Cabin xoay có thể ngâm nước rửa...", "page": 5}, {"id": "62192fd7-4899-46c4-908b-1dc1af7ac499", "content": "1. Phạm vi giao hàng và chi phí vận chuyển\nNORA miễn phí hoàn toàn chi phí vận chuyển tiêu chuẩn cho tất cả các đơn đặt hàng mua sản phẩm NORA Halo\nOne trên phạm vi toàn quốc. Thời gian giao hàng đối với các quận nội thành Hà Nội và TP.", "title": "Tài liệu Trang 6: 1. Phạm vi giao hàng và chi phí...", "page": 6}, {"id": "1eea8b61-99fb-48c4-910e-ff97053feaa0", "content": "3. Kênh tiếp nhận hỗ trợ kỹ thuật\nKhi gặp sự cố vận hành, chủ nuôi liên hệ trực tiếp CS Team qua Hotline: **1900-NORA-CARE** (1900 6672) từ\n8h00 đến 21h00 hàng ngày, hoặc gửi email về: **support@nora.vn** kèm theo video ghi lại tình trạng lỗi của\nmáy để kỹ sư hỗ trợ chẩn đoán từ xa nhanh nhất. CHƯƠNG VI: CHÍNH SÁCH VẬN CHUYỂN & HỖ TRỢ LẮP ĐẶT\n(POL-SHP-01)\nChúng tôi cung cấp dịch vụ giao hàng nhanh chóng và hỗ trợ kỹ thuật tận nơi giúp khách hàng có trải nghiệm\nmua sắm an tâm nhất.", "title": "Tài liệu Trang 6: 3. Kênh tiếp nhận hỗ trợ kỹ thuật...", "page": 6}, {"id": "719285ed-1987-4042-91f4-d52b0be181f7", "content": "CHƯƠNG V: CHÍNH SÁCH BẢO HÀNH & HỖ TRỢ KỸ THUẬT\n(POL-WAR-01)\nCông ty Công nghệ NORA Việt Nam cam kết mang lại sản phẩm chất lượng tốt nhất cùng chế độ hậu mãi chu\nđáo. 1. Thời hạn và điều kiện bảo hành tiêu chuẩn\nThiết bị NORA Halo One được bảo hành chính hãng **12 tháng** kể từ ngày kích hoạt thông qua ứng dụng\nNORA App. Chế độ bảo hành áp dụng cho các lỗi phần cứng phát sinh do lỗi của nhà sản xuất, bao gồm lỗi\nđộng cơ xoay, hỏng hệ thống cảm biến hồng ngoại/trọng lực, bo mạch chủ điều khiển bị lỗi kết nối hoặc camera\nkhông hoạt động. 2. Các trường hợp bị từ chối bảo hành\nNORA có quyền từ chối bảo hành miễn phí và chuyển sang sửa chữa dịch vụ tính phí đối với các lỗi sau:\n• Thiết bị có dấu hiệu bị ngấm nước ở phần đế máy (do ngâm rửa nước hoặc mèo tè lệch dòng chảy thấm vào\nbo mạch bên dưới). • Cháy nổ linh kiện bo mạch do sử dụng nguồn điện không ổn định hoặc cắm sạc Adapter sai thông số (không\ndùng Adapter đi kèm chính hãng). • Thiết bị bị nứt vỡ, móp méo vỏ nhựa do va đập vật lý nặng từ bên ngoài hoặc rơi từ trên cao. • Khách hàng tự ý tháo mở thiết bị, sửa chữa bo mạch hoặc thay thế linh kiện tại các cơ sở không được ủy quyền\nbởi NORA. • Hao mòn tự nhiên theo thời gian (sờn sàn cao su silicon, mờ xước mặt camera).", "title": "Tài liệu Trang 6: CHƯƠNG V: CHÍNH SÁCH BẢO HÀNH & HỖ...", "page": 6}, {"id": "23ce1fcc-3a5e-4a9e-92a5-a4080954ebe7", "content": "Hồ Chí Minh là **24 -\n48 giờ** kể từ khi xác nhận đơn hàng. Thời gian giao hàng tại các tỉnh thành khác dao động từ **3 đến 5 ngày\nlàm việc** tùy thuộc vào địa chỉ thực tế.", "title": "Tài liệu Trang 6: Hồ Chí Minh là **24 - 48 giờ**...", "page": 6}, {"id": "a4159513-52f6-4ec3-8407-c4fc505f093d", "content": "2. Dịch vụ hỗ trợ lắp đặt tận nhà\nNhằm hỗ trợ tốt nhất cho khách hàng, NORA cung cấp dịch vụ giao hàng kết hợp lắp đặt, hướng dẫn kết nối ứng\ndụng và bàn giao trực tiếp tại nhà hoàn toàn **miễn phí** cho các khu vực nội thành thuộc **Hà Nội, Đà Nẵng\nvà TP. Hồ Chí Minh**.", "title": "Tài liệu Trang 7: 2. Dịch vụ hỗ trợ lắp đặt tận...", "page": 7}, {"id": "e4e100cf-533b-49b1-907e-186995133711", "content": "Nhân viên kỹ thuật của NORA sẽ hỗ trợ kiểm tra vị trí đặt máy, kết nối mạng Wi-Fi và thực\nhiện kiểm tra an toàn 10 điểm NORA Guard cùng khách hàng trước khi bàn giao.", "title": "Tài liệu Trang 7: Nhân viên kỹ thuật của NORA sẽ hỗ...", "page": 7}, {"id": "88e666b1-8fab-4cec-8616-e2b0b4714080", "content": "1. Đổi trả do lỗi kỹ thuật (1 đổi 1 trong 30 ngày)\nTrong vòng **30 ngày** đầu tiên sử dụng, nếu thiết bị gặp lỗi kỹ thuật nghiêm trọng liên quan đến động cơ hoặc\nbo mạch điều khiển chính xác nhận do lỗi nhà sản xuất mà không thể khắc phục được bằng các bản cập nhật\nphần mềm, NORA sẽ thực hiện đổi mới thiết bị mới 100% tận nhà và miễn phí toàn bộ chi phí vận chuyển đổi trả\ncho khách hàng. 2. Đổi trả do mèo không làm quen được thiết bị (Mát lòng chủ nuôi)\nChúng tôi hiểu rằng một số bé mèo nhút nhát cần nhiều thời gian để thích nghi hoặc từ chối sử dụng thiết bị\nmới. NORA hỗ trợ nhận lại thiết bị đã qua sử dụng và hoàn tiền trong vòng **14 ngày** kể từ ngày nhận hàng\ndưới các điều kiện sau:\n• Thiết bị còn đầy đủ hộp đóng gói ban đầu, sách hướng dẫn, bộ nguồn Adapter và tem QR code không bị rách\nnát. • Thiết bị không bị móp méo, trầy xước nặng vỏ ngoài hoặc hư hỏng cơ học do lỗi người sử dụng.", "title": "Tài liệu Trang 8: 1. Đổi trả do lỗi kỹ thuật (1...", "page": 8}, {"id": "4e88d772-f649-4ba9-af66-c3c8c88bd4e2", "content": "3. Quy trình hoàn tiền\nSau khi nhận lại máy tại trung tâm bảo hành và kiểm tra tình trạng đạt yêu cầu đổi trả, bộ phận tài chính của\nNORA sẽ tiến hành chuyển khoản hoàn tiền cho khách hàng trong vòng **5 đến 7 ngày làm việc**. CHƯƠNG VIII: QUY TRÌNH TIẾP NHẬN & GIẢI QUYẾT KHIẾU NẠI\n(SOP-CS-01)\nMọi khiếu nại hoặc yêu cầu bảo trì đều được xử lý theo quy trình 3 cấp bậc nhằm rút ngắn tối đa thời gian chờ\nđợi của khách hàng. Quy trình xử lý chuẩn 3 bước\nBước 1: Chẩn đoán từ xa qua Log & Video: Nhân viên CSKH tiếp nhận phản ánh, hỗ trợ hướng dẫn khách hàng\ngửi log lỗi của máy từ NORA App hoặc quay video clip ngắn gửi qua Zalo/Email. Đội ngũ kỹ sư sẽ chẩn đoán lỗi\ntrong vòng **2 giờ làm việc**. Bước 2: Hướng dẫn sửa lỗi nhanh tại chỗ: Đối với các lỗi cơ bản (như sai lệch cảm biến do lệch thảm, kẹt cát do\ndùng sai kích thước cát), nhân viên hỗ trợ gọi video call hướng dẫn chủ nuôi căn chỉnh lại chân máy hoặc cài đặt\nlại app. Quá trình này xử lý dứt điểm 80% trường hợp. Bước 3: Thu hồi bảo hành tận nhà: Nếu xác định lỗi phần cứng cần thay thế linh kiện chuyên dụng, kỹ thuật viên\nNORA sẽ đến tận nơi trong vòng **24 giờ** tại Hà Nội và TP.HCM để thu hồi máy bảo hành. Khách hàng sẽ\nđược **NORA cung cấp một máy Halo One khác để sử dụng tạm thời** trong suốt thời gian bảo hành máy chính\n(tối đa 7 ngày làm việc) để đảm bảo sinh hoạt của các boss không bị gián đoạn.", "title": "Tài liệu Trang 8: 3. Quy trình hoàn tiền Sau khi nhận...", "page": 8}, {"id": "ecd136fb-e50c-4b94-8ffd-2e1b8bd76d92", "content": "CHƯƠNG VII: QUY ĐỊNH ĐỔI TRẢ & HOÀN TIỀN (POL-RET-02)\nNORA mong muốn mang lại sự hài lòng cao nhất cho cả bạn và thú cưng của bạn. Chính sách đổi trả được quy\nđịnh rõ ràng dưới đây.", "title": "Tài liệu Trang 8: CHƯƠNG VII: QUY ĐỊNH ĐỔI TRẢ & HOÀN...", "page": 8}, {"id": "9539d7d8-b50d-4e01-8a2c-332523e00b6e", "content": "• Khách hàng chịu **phí dùng thử hao mòn và vệ sinh khử trùng cabin là 10% giá trị sản phẩm** (được trừ trực\ntiếp vào số tiền hoàn trả). • Khách hàng tự chịu chi phí vận chuyển máy về trung tâm kiểm định của NORA.", "title": "Tài liệu Trang 8: • Khách hàng chịu **phí dùng thử hao...", "page": 8}, {"id": "bc9e7d67-22ec-44e0-8065-a5ef332e3792", "content": "CHƯƠNG IX: HỎI ĐÁP KHÁCH HÀNG CHI TIẾT (FAQ-CS-01)\nCâu hỏi 1: Máy NORA Halo One có giá bán chính thức là bao nhiêu? Trả lời: Giá bán concept tiêu chuẩn của hộp vệ sinh mèo tự động NORA Halo One hiện nay là **8.900.000 VNĐ**\n(đơn giá đã bao gồm thuế VAT, gói bảo hành vàng 12 tháng tại nhà và miễn phí vận chuyển lắp đặt toàn quốc). Câu hỏi 2: NORA Halo One kết nối được với mạng Wi-Fi nào? Có dùng được 5G không?", "title": "Tài liệu Trang 9: CHƯƠNG IX: HỎI ĐÁP KHÁCH HÀNG CHI TIẾT...", "page": 9}, {"id": "cbc7198d-c5bd-45a5-8fbe-da7b1f8d50a9", "content": "Trả lời: **Không nên.** Hãy tránh sử dụng các loại cát thủy tinh không vón cục hoặc cát gỗ hạt quá lớn. Vì các\nhạt cát thô này không thể lọt qua lưới lọc cát có kích thước 1.2 cm của cabin máy. Chúng sẽ bị giữ lại cùng với\nchất thải, dẫn đến việc cát sạch bị đổ bỏ lãng phí hoặc kẹt lưới lọc, làm giảm hiệu suất dọn dẹp tự động. Câu hỏi 4: Có dùng máy được cho gia đình nuôi nhiều mèo không? Trả lời: **Hoàn toàn được.** NORA App cho phép khởi tạo và lưu trữ tối đa **8 hồ sơ mèo** khác nhau. Hệ\nthống cảm biến trọng lực ở 4 chân máy đo khối lượng của từng bé với độ chính xác cao kết hợp với phân tích\nhình ảnh của camera NORA Vision để nhận dạng khuôn mặt/màu lông mèo, tự động phân loại lượt vào vệ sinh\ncủa từng boss. Câu hỏi 5: Ứng dụng NORA App có chia sẻ được cho nhiều người cùng quản lý không? Trả lời: **Được.** Bạn có thể chia sẻ quyền xem nhật ký sức khỏe hoặc quyền điều khiển máy dọn dẹp cho các\nthành viên trong gia đình thông qua tài khoản đăng ký số điện thoại NORA hoặc cho họ quét mã QR thiết bị\nđược chia sẻ trong phần cài đặt quản lý thành viên trên app. Câu hỏi 6: Nếu cúp điện đột ngột hoặc mất kết nối mạng Wi-Fi thì máy có hoạt động không?", "title": "Tài liệu Trang 9: Trả lời: **Không nên.** Hãy tránh sử dụng...", "page": 9}, {"id": "59ca83f6-96c2-46be-b09d-3a4aafd0ee56", "content": "Trả lời: Khi bị cúp điện, máy sẽ ngừng hoạt động hoàn toàn (không xoay dọn tự động). Khi có điện trở lại, máy sẽ\ntự động cân chuẩn lại trọng lượng và hoạt động bình thường. Trường hợp chỉ mất mạng Wi-Fi nhưng vẫn cắm\nđiện, máy vẫn dọn dẹp cát tự động bình thường nhờ bo mạch điều khiển độc lập tích hợp sẵn bên trong, tuy\nnhiên lịch sử sử dụng và hình ảnh live-view sẽ không đồng bộ về điện thoại cho đến khi có mạng kết nối trở lại. Câu hỏi 7: Màng khóa mùi sinh học có cần phải thay thế định kỳ không? Trả lời: Để đạt hiệu suất khử mùi và diệt khuẩn tối đa, chúng tôi khuyến nghị thay thế màng khóa mùi sinh học\nđịnh kỳ sau mỗi 60-90 ngày. Bạn có thể dễ dàng đặt mua màng thay thế chính hãng trực tiếp trên NORA App.", "title": "Tài liệu Trang 9: Trả lời: Khi bị cúp điện, máy sẽ...", "page": 9}, {"id": "b0ae6a88-cbec-440f-94b3-44c66ce3bafe", "content": "Trả lời: Thiết bị hỗ trợ băng tần Wi-Fi 2.4GHz để tối ưu hóa khoảng cách phủ sóng xa và ổn định (không hỗ trợ\nmạng Wi-Fi băng tần 5.0 GHz hoặc các mạng Wi-Fi doanh nghiệp yêu cầu đăng nhập trang web trung gian), kết\nhợp với Bluetooth để hỗ trợ ghép nối nhanh chóng trên ứng dụng trong lần đầu thiết lập. Câu hỏi 3: Tôi có thể dùng các loại cát gỗ lớn hoặc cát thủy tinh cho máy được không?", "title": "Tài liệu Trang 9: Trả lời: Thiết bị hỗ trợ băng tần...", "page": 9}];
+        
+        // Initialize page filter dropdown options
+        const initPageFilter = () => {
+            const select = document.getElementById("pageFilter");
+            const pages = [...new Set(chunks.map(c => c.page))].sort((a, b) => a - b);
+            pages.forEach(p => {
+                const opt = document.createElement("option");
+                opt.value = p;
+                opt.textContent = `Trang số ${p}`;
+                select.appendChild(opt);
+            });
+        };
+        
+        // Escape HTML tags to prevent XSS
+        const escapeHTML = (text) => {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        };
+        
+        // Highlight search keyword in content
+        const highlightText = (text, query) => {
+            if (!query) return escapeHTML(text);
+            const escapedQuery = query.replace(/[-\/\^$*+?.()|[\]{}]/g, '\$&');
+            const regex = new RegExp(`(${escapedQuery})`, 'gi');
+            const escapedText = escapeHTML(text);
+            return escapedText.replace(regex, '<span class="highlight">$1</span>');
+        };
+        
+        // Filter and render chunks
+        const filterChunks = () => {
+            const query = document.getElementById("searchInput").value.trim().toLowerCase();
+            const pageVal = document.getElementById("pageFilter").value;
+            const container = document.getElementById("chunksContainer");
+            
+            const filtered = chunks.filter(c => {
+                const matchesSearch = c.content.toLowerCase().includes(query) || c.title.toLowerCase().includes(query);
+                const matchesPage = pageVal === "all" || c.page.toString() === pageVal;
+                return matchesSearch && matchesPage;
+            });
+            
+            // Update stats badge
+            const badge = document.getElementById("statsBadge");
+            badge.textContent = `Tổng cộng: ${filtered.length} / ${chunks.length} Chunks`;
+            
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="empty-state">Không tìm thấy phân mảnh nào khớp với từ khóa tìm kiếm.</div>`;
+                return;
+            }
+            
+            container.innerHTML = filtered.map((c, i) => `
+                <div class="chunk-card">
+                    <div class="chunk-header">
+                        <div class="chunk-title">${escapeHTML(c.title)}</div>
+                        <div class="chunk-meta">
+                            <span class="badge-page">Trang ${c.page}</span>
+                            <span class="badge-id">ID: ${c.id.substring(0, 12)}...</span>
+                        </div>
+                    </div>
+                    <div class="chunk-body">${highlightText(c.content, query)}</div>
+                </div>
+            `).join('');
+        };
+        
+        // Initial load
+        window.onload = () => {
+            initPageFilter();
+            filterChunks();
+        };
+    </script>
+</body>
+</html>
