@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { Lora, Be_Vietnam_Pro } from "next/font/google";
-import { Chatbot } from "@/components/chat/Chatbot";
+import dynamic from "next/dynamic";
 import "./globals.scss";
+
+const Chatbot = dynamic(() => import("@/components/chat/Chatbot").then(mod => mod.Chatbot), {
+  ssr: false,
+});
 
 const lora = Lora({
   variable: "--font-lora",
