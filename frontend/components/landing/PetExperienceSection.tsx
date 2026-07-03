@@ -173,7 +173,6 @@ export default function PetExperienceSection() {
                   fill
                   sizes="(max-width: 1024px) 100vw, 55vw"
                   className="object-cover"
-                  priority
                 />
               </motion.div>
 

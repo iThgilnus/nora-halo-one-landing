@@ -113,8 +113,6 @@ export function ProblemSection() {
                   fill
                   sizes="45vw"
                   className={styles.backgroundImage}
-                  priority
-                  unoptimized
                 />
               </motion.div>
               <div className={styles.gradientOverlay} />

@@ -44,9 +44,10 @@ const navLinks = [
 export function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [activeSection, setActiveSection] = useState<string>("");
   const progressRef = useRef<HTMLDivElement>(null);
+  const scrolledRef = useRef(false);
+  const scrollRafRef = useRef<number | null>(null);
 
   const theme = useSyncExternalStore(
     subscribeTheme,
@@ -65,22 +66,38 @@ export function SiteHeader() {
 
   // Scroll progress + scrolled state
   useEffect(() => {
-    const handleScroll = () => {
+    const updateScrollState = () => {
+      scrollRafRef.current = null;
+
       const scrollY = window.scrollY;
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
       const progress = docHeight > 0 ? scrollY / docHeight : 0;
 
-      setScrollProgress(progress);
-      setScrolled(scrollY > window.innerHeight - 80);
-
       if (progressRef.current) {
         progressRef.current.style.transform = `scaleX(${progress})`;
       }
+
+      const nextScrolled = scrollY > window.innerHeight - 80;
+      if (nextScrolled !== scrolledRef.current) {
+        scrolledRef.current = nextScrolled;
+        setScrolled(nextScrolled);
+      }
+    };
+
+    const handleScroll = () => {
+      if (scrollRafRef.current !== null) return;
+      scrollRafRef.current = window.requestAnimationFrame(updateScrollState);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    updateScrollState();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (scrollRafRef.current !== null) {
+        window.cancelAnimationFrame(scrollRafRef.current);
+      }
+    };
   }, []);
 
   // Active section via IntersectionObserver
@@ -122,7 +139,7 @@ export function SiteHeader() {
         ref={progressRef}
         aria-hidden
         className={styles.progressBar}
-        style={{ transform: `scaleX(${scrollProgress})`, willChange: "transform" }}
+        style={{ transform: "scaleX(0)", willChange: "transform" }}
       />
 
       <div className={styles.innerContainer}>

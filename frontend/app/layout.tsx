@@ -6,15 +6,17 @@ import "./globals.scss";
 const lora = Lora({
   variable: "--font-lora",
   subsets: ["latin", "vietnamese"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "700"],
   display: "swap",
+  preload: false,
 });
 
 const beVietnam = Be_Vietnam_Pro({
   variable: "--font-be-vietnam",
   subsets: ["latin", "vietnamese"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["400", "600", "700"],
   display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {

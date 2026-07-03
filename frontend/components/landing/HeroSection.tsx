@@ -1,56 +1,24 @@
-"use client";
-
-import { useRef } from "react";
-import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { ArrowDown, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import { ButtonLink } from "@/components/ui/Button";
 import styles from "./HeroSection.module.scss";
 
-
-
 export function HeroSection() {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Scroll-driven animations
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end start"],
-  });
-
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.05]);
-  const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
-  const y = useTransform(scrollYProgress, [0, 1], [0, 40]);
-  const gridY = useTransform(scrollYProgress, [0, 1], [0, -20]);
-  const smoothGridY = useSpring(gridY, { stiffness: 80, damping: 20 });
-
   return (
     <section
-      ref={containerRef}
       id="top"
       className={styles.sectionContainer}
     >
       {/* Background Parallax Grid */}
-      <motion.div
-        style={{ y: smoothGridY }}
-        className={styles.parallaxGrid}
-      />
+      <div className={styles.parallaxGrid} />
 
       {/* Radial vignette */}
       <div className={styles.vignette} />
 
-      <motion.div
-        style={{ scale, opacity, y }}
-        className={styles.contentGrid}
-      >
+      <div className={styles.contentGrid}>
         {/* Left Column: Content */}
         <div className={styles.textCol}>
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className={styles.textContainer}
-          >
+          <div className={styles.textContainer}>
             {/* Status Badge */}
             <div className={styles.statusBadge}>
               <span className={styles.pingWrapper}>
@@ -118,7 +86,7 @@ export function HeroSection() {
                 </div>
               ))}
             </div>
-          </motion.div>
+          </div>
         </div>
 
         {/* Right Column: Image */}
@@ -128,7 +96,7 @@ export function HeroSection() {
             alt="NORA Halo One smart cat care station in a modern cat-friendly home"
             fill
             priority
-            unoptimized
+            fetchPriority="high"
             sizes="(min-width: 1024px) 50vw, 100vw"
             className={styles.heroImage}
           />
@@ -137,7 +105,7 @@ export function HeroSection() {
           <div className={styles.bottomFade} />
           <div className={styles.leftFade} />
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }

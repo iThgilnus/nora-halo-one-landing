@@ -225,8 +225,6 @@ export default function TechnologySection() {
                 fill
                 sizes="40vw"
                 className={styles.cutawayImage}
-                priority
-                unoptimized
               />
 
               {/* Sensor status bar — bottom overlay */}
@@ -279,8 +277,6 @@ export default function TechnologySection() {
               fill
               sizes="90vw"
               className={styles.mobileImage}
-              priority
-              unoptimized
             />
 
             {/* Sensor status bar overlay on image */}
