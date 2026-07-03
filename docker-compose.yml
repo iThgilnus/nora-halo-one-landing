@@ -3,10 +3,10 @@ services:
     image: mysql:8.0
     container_name: nora-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: nora_root_secure_pass
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-nora_db}
-      MYSQL_USER: ${MYSQL_USER:-nora_admin}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-nora_secure_pass}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "3308:3306"
     volumes:
@@ -32,9 +32,9 @@ services:
       - PORT=8001
       - MYSQL_HOST=mysql
       - MYSQL_PORT=3306
-      - MYSQL_USER=${MYSQL_USER:-nora_admin}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-nora_secure_pass}
-      - MYSQL_DATABASE=${MYSQL_DATABASE:-nora_db}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
     depends_on:
       mysql:
         condition: service_healthy
@@ -53,9 +53,9 @@ services:
       - PORT=3001
       - MYSQL_HOST=mysql
       - MYSQL_PORT=3306
-      - MYSQL_USER=${MYSQL_USER:-nora_admin}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-nora_secure_pass}
-      - MYSQL_DATABASE=${MYSQL_DATABASE:-nora_db}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
     depends_on:
       - backend
     restart: unless-stopped
