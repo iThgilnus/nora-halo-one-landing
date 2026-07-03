@@ -39,6 +39,9 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Nguyen Van Minh Hai" }],
   creator: "Nguyen Van Minh Hai",
+  icons: {
+    icon: "/icon.png",
+  },
   openGraph: {
     title: "NORA Halo One | Intelligent Cat Care Station",
     description:

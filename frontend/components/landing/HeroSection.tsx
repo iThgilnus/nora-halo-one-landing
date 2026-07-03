@@ -15,11 +15,11 @@ function SplitWords({ text, className, delay = 0 }: { text: string; className?: 
       {words.map((word, i) => (
         <motion.span
           key={`${word}-${i}`}
-          initial={{ opacity: 0, y: 28, filter: "blur(6px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{
-            duration: 0.7,
-            delay: delay + i * 0.08,
+            duration: 0.5,
+            delay: delay + i * 0.05,
             ease: [0.16, 1, 0.3, 1],
           }}
           className={styles.splitWords}
@@ -167,6 +167,7 @@ export function HeroSection() {
             alt="NORA Halo One smart cat care station in a modern cat-friendly home"
             fill
             priority
+            unoptimized
             sizes="(min-width: 1024px) 50vw, 100vw"
             className={styles.heroImage}
           />
