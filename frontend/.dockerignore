@@ -1,0 +1,14 @@
+node_modules
+.next
+out
+.git
+.gitignore
+*.log
+Dockerfile
+.dockerignore
+.agents
+.gemini
+CVS
+.svn
+.hg
+.DS_Store
