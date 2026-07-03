@@ -4,7 +4,7 @@
   position: relative;
   background-color: #eae8e1;
   color: var(--text-primary);
-  overflow: hidden;
+  overflow: visible; /* Allow sticky child overflow */
   padding: 6rem 0;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
@@ -15,6 +15,11 @@
     background-color: #0b0e0d;
     color: #fff;
     border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  @include respond-to('lg') {
+    padding: 0;
+    height: 250vh; /* Define 250vh scroll-track height */
   }
 }
 
@@ -49,6 +54,16 @@
   margin: 0 auto;
   width: 100%;
   max-width: 1280px;
+
+  @include respond-to('lg') {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 2rem;
+  }
 }
 
 .headingArea {

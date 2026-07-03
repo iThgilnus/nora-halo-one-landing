@@ -1,14 +1,10 @@
 "use client";
 
-import { useRef, useState, useSyncExternalStore } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
+import { useRef, useState, useEffect, useSyncExternalStore } from "react";
 import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
 import styles from "./SolutionRevealSection.module.scss";
-
-gsap.registerPlugin(ScrollTrigger);
 
 type Theme = "dark" | "light";
 const themeKey = "nora-theme";
@@ -68,23 +64,34 @@ function DesignSvg() {
       <circle cx="200" cy="200" r="66" stroke="rgba(20, 184, 166, 0.25)" strokeWidth="1" />
 
       {/* Signature glowing Halo Ring */}
-      <circle className="haloGlowCircle" cx="200" cy="200" r="66" fill="url(#haloGlow)" opacity="0.65" />
-      <circle
+      <motion.circle
+        className="haloGlowCircle"
+        cx="200"
+        cy="200"
+        r="66"
+        fill="url(#haloGlow)"
+        opacity="0.65"
+        style={{ transformOrigin: "center center" }}
+        animate={{ scale: [1, 1.06, 1] }}
+        transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
+      />
+      <motion.circle
         className="haloRingPath"
         cx="200"
         cy="200"
         r="66"
         stroke="#14b8a6"
-        strokeWidth="3"
         strokeLinecap="round"
         filter="drop-shadow(0 0 10px #14b8a6)"
+        animate={{ strokeWidth: [3, 4.5, 3] }}
+        transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
       />
 
       {/* Ambient data coordinates dots */}
-      <circle className="designParticle" cx="120" cy="110" r="3" fill="#14b8a6" opacity="0.6" />
-      <circle className="designParticle" cx="280" cy="130" r="2.5" fill="#14b8a6" opacity="0.4" />
-      <circle className="designParticle" cx="140" cy="290" r="4" fill="#14b8a6" opacity="0.5" />
-      <circle className="designParticle" cx="260" cy="280" r="3" fill="#14b8a6" opacity="0.3" />
+      <motion.circle cx="120" cy="110" r="3" fill="#14b8a6" opacity="0.6" animate={{ y: [0, -8, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut", delay: 0 }} />
+      <motion.circle cx="280" cy="130" r="2.5" fill="#14b8a6" opacity="0.4" animate={{ y: [0, -8, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut", delay: 0.12 }} />
+      <motion.circle cx="140" cy="290" r="4" fill="#14b8a6" opacity="0.5" animate={{ y: [0, -8, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut", delay: 0.24 }} />
+      <motion.circle cx="260" cy="280" r="3" fill="#14b8a6" opacity="0.3" animate={{ y: [0, -8, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut", delay: 0.36 }} />
     </svg>
   );
 }
@@ -104,17 +111,22 @@ function TechSvg() {
       <rect x="130" y="100" width="140" height="200" rx="70" stroke="rgba(14, 165, 233, 0.2)" strokeWidth="1" />
 
       {/* Active Radar Sweep Cone Group (rotating 360deg around center) */}
-      <g className="radarScanGroup">
+      <motion.g
+        className="radarScanGroup"
+        style={{ transformOrigin: "200px 200px" }}
+        animate={{ rotate: 360 }}
+        transition={{ repeat: Infinity, duration: 3.5, ease: "linear" }}
+      >
         <path
           className="radarScanCone"
           d="M 200 200 L 200 80 A 120 120 0 0 1 284.85 115.15 Z"
           fill="url(#radarCone)"
           opacity="0.65"
         />
-      </g>
+      </motion.g>
 
       {/* Concentric Guard Shields */}
-      <circle
+      <motion.circle
         className="shieldRing1"
         cx="200"
         cy="200"
@@ -123,8 +135,11 @@ function TechSvg() {
         strokeWidth="1.2"
         strokeDasharray="6 6"
         opacity="0.85"
+        style={{ transformOrigin: "200px 200px" }}
+        animate={{ rotate: 360 }}
+        transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
       />
-      <circle
+      <motion.circle
         className="shieldRing2"
         cx="200"
         cy="200"
@@ -133,8 +148,11 @@ function TechSvg() {
         strokeWidth="1"
         strokeDasharray="12 8"
         opacity="0.65"
+        style={{ transformOrigin: "200px 200px" }}
+        animate={{ rotate: -360 }}
+        transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
       />
-      <circle
+      <motion.circle
         className="shieldRing3"
         cx="200"
         cy="200"
@@ -143,109 +161,109 @@ function TechSvg() {
         strokeWidth="1"
         strokeDasharray="4 4"
         opacity="0.45"
+        style={{ transformOrigin: "200px 200px" }}
+        animate={{ rotate: 360 }}
+        transition={{ repeat: Infinity, duration: 32, ease: "linear" }}
       />
 
       {/* Pulse Radar Wave */}
-      <circle className="radarPulseWave" cx="200" cy="200" r="40" stroke="#0ea5e9" strokeWidth="1.5" opacity="0" />
+      <motion.circle
+        cx="200"
+        cy="200"
+        stroke="#0ea5e9"
+        strokeWidth="1.5"
+        animate={{ r: [40, 110], opacity: [0.8, 0] }}
+        transition={{ repeat: Infinity, duration: 1.8, ease: "easeOut" }}
+      />
 
-      {/* Center Blinking Sensor Node */}
-      <circle cx="200" cy="200" r="5" fill="#0ea5e9" />
-      <circle className="sensorBlink" cx="200" cy="200" r="10" stroke="#0ea5e9" strokeWidth="1" opacity="0.75" />
+      {/* Embedded sensors blinking */}
+      <g>
+        <circle cx="200" cy="80" r="4" fill="#0ea5e9" />
+        <motion.circle
+          cx="200"
+          cy="80"
+          fill="#0ea5e9"
+          style={{ transformOrigin: "200px 80px" }}
+          animate={{ scale: [0.8, 1.8], opacity: [0.8, 0] }}
+          transition={{ repeat: Infinity, duration: 1.3, ease: "easeOut" }}
+          r="4"
+        />
+      </g>
     </svg>
   );
 }
 
-// 🍃 SVG 3: Airflow lines & Carbon filtration
+// 🍃 SVG 3: Sealed Chamber Airflow & Refreshing Bubbles
 function ExperienceSvg() {
+  const theme = useSyncExternalStore(subscribeTheme, getThemeSnapshot, getServerThemeSnapshot);
+  const color = theme === "light" ? "rgba(17, 20, 17, 0.05)" : "rgba(250, 249, 246, 0.04)";
+
   return (
     <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="flowGrad" x1="0%" y1="50%" x2="100%" y2="50%">
-          <stop offset="0%" stopColor="#eab308" stopOpacity="0.85" />
-          <stop offset="100%" stopColor="#eab308" stopOpacity="0.15" />
-        </linearGradient>
+        <radialGradient id="freshZone" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.18" />
+          <stop offset="100%" stopColor="#f59e0b" stopOpacity="0" />
+        </radialGradient>
       </defs>
 
-      {/* Machine Outline */}
-      <rect x="120" y="80" width="160" height="240" rx="80" stroke="rgba(234, 179, 8, 0.18)" strokeWidth="1" />
+      {/* Schematic chamber walls */}
+      <rect x="80" y="80" width="240" height="240" rx="16" fill={color} stroke="rgba(245, 158, 11, 0.12)" strokeWidth="1" />
 
-      {/* Sealed Carbon Filter Block */}
-      <rect x="220" y="140" width="45" height="70" rx="8" fill="rgba(234, 179, 8, 0.08)" stroke="rgba(234, 179, 8, 0.3)" strokeWidth="1" />
-
-      {/* Airflow Curves */}
-      <path
-        className="airflowLine airflowLine1"
-        d="M 155 260 C 170 210, 195 200, 235 180"
-        stroke="url(#flowGrad)"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeDasharray="8 8"
-      />
-      <path
-        className="airflowLine airflowLine2"
-        d="M 145 235 C 175 190, 195 180, 235 170"
-        stroke="url(#flowGrad)"
+      {/* Airflow Circulation Loop (dashed curves) */}
+      <motion.path
+        d="M 120 180 A 80 80 0 0 1 280 180"
+        stroke="#f59e0b"
         strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeDasharray="6 6"
+        strokeDasharray="6 4"
+        animate={{ strokeDashoffset: [0, -20] }}
+        transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
       />
-      <path
-        className="airflowLine airflowLine3"
-        d="M 165 270 C 185 230, 205 210, 235 190"
-        stroke="url(#flowGrad)"
+      <motion.path
+        d="M 280 220 A 80 80 0 0 1 120 220"
+        stroke="#f59e0b"
         strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeDasharray="7 7"
+        strokeDasharray="6 4"
+        animate={{ strokeDashoffset: [0, 20] }}
+        transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
       />
 
-      {/* Floating odor particles dissolving */}
-      <circle className="odorParticle" cx="150" cy="255" r="3.5" fill="#eab308" opacity="0.8" />
-      <circle className="odorParticle" cx="180" cy="225" r="3" fill="#eab308" opacity="0.6" />
-      <circle className="odorParticle" cx="205" cy="200" r="2.5" fill="#eab308" opacity="0.4" />
+      {/* Fresh fragrance bubble core */}
+      <circle cx="200" cy="200" r="50" fill="url(#freshZone)" />
 
-      {/* Purified fresh air bubbles */}
-      <circle className="cleanBubble" cx="255" cy="120" r="4.5" fill="#eab308" stroke="rgba(234, 179, 8, 0.4)" strokeWidth="1" opacity="0.6" />
-      <circle className="cleanBubble" cx="275" cy="100" r="3" fill="#eab308" stroke="rgba(234, 179, 8, 0.4)" strokeWidth="1" opacity="0.4" />
-      <circle className="cleanBubble" cx="245" cy="90" r="4" fill="#eab308" stroke="rgba(234, 179, 8, 0.4)" strokeWidth="1" opacity="0.5" />
+      {/* Odor particles (Staggered fading drifts) */}
+      <motion.circle cx="200" cy="200" r="2.5" fill="#f59e0b" animate={{ x: [0, 35], y: [0, -25], opacity: [0.85, 0] }} transition={{ repeat: Infinity, duration: 2.0, ease: "easeOut", delay: 0 }} />
+      <motion.circle cx="200" cy="200" r="3.5" fill="#f59e0b" animate={{ x: [0, 50], y: [0, -40], opacity: [0.85, 0] }} transition={{ repeat: Infinity, duration: 2.0, ease: "easeOut", delay: 0.35 }} />
+      <motion.circle cx="200" cy="200" r="2" fill="#f59e0b" animate={{ x: [0, 65], y: [0, -55], opacity: [0.85, 0] }} transition={{ repeat: Infinity, duration: 2.0, ease: "easeOut", delay: 0.7 }} />
+
+      {/* Rising fresh bubbles */}
+      <motion.circle cx="160" r="5" fill="#f59e0b" stroke="rgba(245, 158, 11, 0.4)" strokeWidth="0.8" animate={{ y: [220, 165], opacity: [0, 0.75, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: "easeOut", delay: 0 }} />
+      <motion.circle cx="240" r="3.5" fill="#f59e0b" stroke="rgba(245, 158, 11, 0.4)" strokeWidth="0.8" animate={{ y: [220, 165], opacity: [0, 0.75, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: "easeOut", delay: 0.5 }} />
+      <motion.circle cx="200" r="6" fill="#f59e0b" stroke="rgba(245, 158, 11, 0.4)" strokeWidth="0.8" animate={{ y: [220, 165], opacity: [0, 0.75, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: "easeOut", delay: 1.0 }} />
     </svg>
   );
 }
 
-interface Milestone {
-  id: string;
-  label: string;
-  badge: string;
-  title: string;
-  description: string;
-  svg: React.ReactNode;
-  bottomLabel: string;
-  metrics: {
-    label: string;
-    value: string;
-    isHighlight?: boolean;
-  }[];
-}
-
-const milestones: Milestone[] = [
+const milestones = [
   {
     id: "design",
     label: "01 / Thiết kế",
-    badge: "Thiết kế tương lai",
-    title: "Halo One.\nThiết kế từ tương lai.",
-    description: "Tích hợp màng lọc khép kín và hệ thống cảm biến trong diện mạo tối giản như một tác phẩm nghệ thuật.",
+    badge: "Ngôn ngữ tối giản",
+    title: "Vòng xoay Halo.\nĐiểm nhấn tinh tế.",
+    description: "Khối lồng tròn vỏ nhám ôm khít khung chân kim loại mảnh. Đèn báo trạng thái Halo đổi sắc màu trực quan tạo điểm nhấn sang trọng.",
     svg: <DesignSvg />,
-    bottomLabel: "Nâng tầm không gian sống",
+    bottomLabel: "Tinh hoa tối giản",
     metrics: [
-      { label: "Kiểu dáng", value: "Trụ tròn tối giản" },
-      { label: "Tiết diện", value: "Tiết kiệm 30%", isHighlight: true }
+      { label: "Vật liệu khung vỏ", value: "Nhựa ABS kháng khuẩn" },
+      { label: "Bán kính xoay", value: "320mm Gọn gàng", isHighlight: true }
     ]
   },
   {
-    id: "tech",
+    id: "technology",
     label: "02 / Công nghệ",
-    badge: "Bảo vệ đa lớp",
-    title: "10 lớp bảo vệ.\nAn toàn tuyệt đối.",
-    description: "Mạng lưới radar hồng ngoại, cảm biến lực, cảm biến Hall và camera AI phối hợp thời gian thực, phản hồi an toàn tức thì.",
+    badge: "An toàn chủ động",
+    title: "Mạng cảm biến.\nBảo vệ boss 3 lớp.",
+    description: "Nhận dạng khoảng cách xa bằng camera hồng ngoại góc rộng, radar nhiệt lối vào cabin và hệ cảm biến lực bốn góc đế.",
     svg: <TechSvg />,
     bottomLabel: "Bảo vệ boss toàn diện",
     metrics: [
@@ -270,183 +288,95 @@ const milestones: Milestone[] = [
 
 export function SolutionRevealSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const stickyRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const mobileTrackRef = useRef<HTMLDivElement>(null);
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [scrollDistance, setScrollDistance] = useState(0);
 
-  useGSAP(
-    () => {
-      const section = sectionRef.current;
-      const sticky = stickyRef.current;
-      const track = trackRef.current;
-      if (!section || !sticky || !track) return;
+  // Desktop horizontal scroll progress
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end end"],
+  });
 
-      const getDistance = () => {
-        return track.scrollWidth - window.innerWidth;
-      };
-
-      const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
-      let tl: gsap.core.Tween | null = null;
-
-      if (isDesktop) {
-        // 1. GSAP ScrollTrigger timeline to drive horizontal sliding
-        tl = gsap.to(track, {
-          x: () => -getDistance(),
-          ease: "none",
-          scrollTrigger: {
-            trigger: section,
-            pin: true,
-            scrub: 0.8,
-            start: "top 72px",
-            end: () => `+=${Math.max(getDistance(), window.innerHeight * 2.5)}`,
-            invalidateOnRefresh: true,
-            onUpdate: (self) => {
-              const progress = self.progress;
-              setScrollProgress(progress * 100);
-
-              const index = Math.min(
-                Math.floor(progress * milestones.length),
-                milestones.length - 1
-              );
-              setActiveIndex(index);
-            }
-          }
-        });
+  useEffect(() => {
+    const handleResize = () => {
+      if (trackRef.current) {
+        setScrollDistance(trackRef.current.scrollWidth - window.innerWidth);
       }
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
-      // 2. SVG 1 (Design) continuous breathing and float animations
-      gsap.to(".haloRingPath", {
-        strokeWidth: 4.5,
-        ease: "sine.inOut",
-        yoyo: true,
-        repeat: -1,
-        duration: 1.6
-      });
-      gsap.to(".haloGlowCircle", {
-        scale: 1.06,
-        transformOrigin: "center center",
-        ease: "sine.inOut",
-        yoyo: true,
-        repeat: -1,
-        duration: 1.6
-      });
-      gsap.to(".designParticle", {
-        y: -8,
-        stagger: 0.12,
-        yoyo: true,
-        repeat: -1,
-        ease: "sine.inOut",
-        duration: 2.2
-      });
+  const x = useTransform(scrollYProgress, [0, 1], [0, -scrollDistance]);
 
-      // 3. SVG 2 (Tech) radar spins, cone sweeps, and blinking nodes
-      gsap.to(".shieldRing1", {
-        rotation: 360,
-        transformOrigin: "center center",
-        ease: "none",
-        repeat: -1,
-        duration: 12
-      });
-      gsap.to(".shieldRing2", {
-        rotation: -360,
-        transformOrigin: "center center",
-        ease: "none",
-        repeat: -1,
-        duration: 20
-      });
-      gsap.to(".shieldRing3", {
-        rotation: 360,
-        transformOrigin: "center center",
-        ease: "none",
-        repeat: -1,
-        duration: 32
-      });
-      gsap.to(".radarScanGroup", {
-        rotation: 360,
-        svgOrigin: "200 200",
-        ease: "none",
-        repeat: -1,
-        duration: 3.5
-      });
-      gsap.fromTo(".radarPulseWave", {
-        r: 40,
-        opacity: 0.8
-      }, {
-        r: 110,
-        opacity: 0,
-        duration: 1.8,
-        repeat: -1,
-        ease: "power1.out"
-      });
-      gsap.fromTo(".sensorBlink", {
-        scale: 0.8,
-        opacity: 0.8,
-        transformOrigin: "center center"
-      }, {
-        scale: 1.8,
-        opacity: 0,
-        duration: 1.3,
-        repeat: -1,
-        ease: "power1.out"
-      });
-
-      // 4. SVG 3 (Experience) continuous airflow dashes and fresh bubbles rising
-      gsap.to(".airflowLine", {
-        strokeDashoffset: -20,
-        ease: "none",
-        repeat: -1,
-        duration: 1.2
-      });
-      gsap.fromTo(".odorParticle", {
-        x: 0,
-        y: 0,
-        opacity: 0.85
-      }, {
-        x: (i) => i * 15 + 20,
-        y: (i) => -i * 15 - 10,
-        opacity: 0,
-        stagger: { each: 0.35, repeat: -1 },
-        duration: 2.0,
-        ease: "power1.out"
-      });
-      gsap.fromTo(".cleanBubble", {
-        y: 20,
-        opacity: 0
-      }, {
-        y: -35,
-        opacity: 0.75,
-        repeat: -1,
-        duration: 2.2,
-        stagger: 0.5,
-        ease: "sine.out"
-      });
-
-      return () => {
-        if (tl) {
-          tl.scrollTrigger?.kill();
-          tl.kill();
-        }
-      };
-    },
-    { dependencies: [], scope: sectionRef }
-  );
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    setScrollProgress(latest * 100);
+    const index = Math.min(
+      Math.floor(latest * milestones.length),
+      milestones.length - 1
+    );
+    setActiveIndex(index);
+  });
 
   const scrollToIndex = (index: number) => {
-    const trigger = ScrollTrigger.getAll().find(st => st.vars.trigger === sectionRef.current);
-    if (trigger) {
-      const start = trigger.start;
-      const total = trigger.end - start;
-      const target = start + total * (index / (milestones.length - 1));
-      window.scrollTo({
-        top: target,
+    const el = sectionRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const start = window.scrollY + rect.top;
+    const scrollableDist = el.clientHeight - window.innerHeight;
+    const target = start + scrollableDist * (index / (milestones.length - 1));
+    window.scrollTo({
+      top: target,
+      behavior: "smooth"
+    });
+  };
+
+  const handleMobileScroll = () => {
+    const el = mobileTrackRef.current;
+    if (!el) return;
+    const cards = el.querySelectorAll(`.${styles.mobCard}`);
+    const containerRect = el.getBoundingClientRect();
+    const containerCenter = containerRect.left + containerRect.width / 2;
+
+    let closestIndex = 0;
+    let minDistance = Infinity;
+
+    cards.forEach((card, idx) => {
+      const cardDiv = card as HTMLDivElement;
+      const cardRect = cardDiv.getBoundingClientRect();
+      const cardCenter = cardRect.left + cardRect.width / 2;
+      const dist = Math.abs(containerCenter - cardCenter);
+
+      if (dist < minDistance) {
+        minDistance = dist;
+        closestIndex = idx;
+      }
+    });
+
+    setActiveIndex(closestIndex);
+  };
+
+  const scrollMobileTo = (index: number) => {
+    const el = mobileTrackRef.current;
+    if (!el) return;
+    const cards = el.querySelectorAll(`.${styles.mobCard}`);
+    const targetCard = cards[index] as HTMLDivElement;
+    if (targetCard) {
+      const containerRect = el.getBoundingClientRect();
+      const cardRect = targetCard.getBoundingClientRect();
+      const scrollTarget = cardRect.left - containerRect.left + el.scrollLeft - (containerRect.width - cardRect.width) / 2;
+
+      el.scrollTo({
+        left: scrollTarget,
         behavior: "smooth"
       });
     }
   };
-
 
   return (
     <div
@@ -459,7 +389,7 @@ export function SolutionRevealSection() {
       )}
     >
       {/* 🖥️ DESKTOP VIEWPORT */}
-      <div ref={stickyRef} className={styles.desktopViewport}>
+      <div className={styles.desktopViewport}>
         <div className={styles.ambientRadial} />
         <div className={styles.dotGrid} />
 
@@ -518,7 +448,7 @@ export function SolutionRevealSection() {
         </div>
 
         {/* Horizontal Scroll Track */}
-        <div ref={trackRef} className={styles.horizontalTrack}>
+        <motion.div style={{ x }} ref={trackRef} className={styles.horizontalTrack}>
           {milestones.map((milestone) => (
             <div key={milestone.id} className={styles.milestoneCard}>
               {/* Left Side Info Panel */}
@@ -561,7 +491,7 @@ export function SolutionRevealSection() {
               </div>
             </div>
           ))}
-        </div>
+        </motion.div>
       </div>
 
       {/* 📱 MOBILE VIEWPORT */}
@@ -570,103 +500,82 @@ export function SolutionRevealSection() {
           <div className={styles.mobHeaderArea}>
             <div className={styles.eyebrowBadge}>
               <Sparkles size={12} />
-              Hoạt họa chức năng
+              Trình diễn công năng
             </div>
-            <h2 className={styles.mobTitle}>
-              Khám phá{" "}
-              <span className={styles.headingTitleAccent}>
-                Halo One
-              </span>
-            </h2>
-            <p className={styles.mobSubtext}>
-              Nhấn các tab dưới đây để khám phá các khía cạnh công nghệ khác nhau của dòng sản phẩm Halo One qua bản vẽ động.
+            <h2 className={styles.mobHeadingTitle}>Trải nghiệm thông minh</h2>
+            <p className={styles.mobHeadingDesc}>
+              Khám phá giải pháp chăm sóc mèo vượt trội qua 3 phương diện chính.
             </p>
           </div>
 
-          {/* Segmented Control Tabs */}
-          <div className={styles.mobTabsRow}>
+          {/* Svg display area (peeks at active index SVG) */}
+          <div className={styles.mobileSvgContainer}>
+            <div className={styles.mobileSvgBorderWrapper}>
+              <div className={styles.mobileSvgInnerFrame}>
+                <div className={styles.mobSvgOverlayRadial} />
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeIndex}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.25 }}
+                    className={styles.mobileSvgWrapper}
+                  >
+                    {milestones[activeIndex].svg}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </div>
+          </div>
+
+          {/* Horizontal Track of info cards */}
+          <div
+            ref={mobileTrackRef}
+            onScroll={handleMobileScroll}
+            className={styles.mobileTrack}
+          >
             {milestones.map((milestone, idx) => {
-              const shortLabels = ["Thiết kế", "Bảo vệ", "Tiện ích"];
+              const isActive = activeIndex === idx;
               return (
-                <button
+                <div
                   key={milestone.id}
-                  onClick={() => setActiveIndex(idx)}
-                  className={cn(
-                    styles.mobTabButton,
-                    activeIndex === idx && styles.activeTab
-                  )}
+                  className={cn(styles.mobCard, isActive && styles.activeMobCard)}
                 >
-                  <span className={styles.tabNum}>{`0${idx + 1}`}</span>
-                  <span className={styles.tabText}>{shortLabels[idx]}</span>
-                </button>
+                  <span className={styles.mobCardLabel}>{milestone.label}</span>
+                  <h3 className={styles.mobCardTitle}>{milestone.title}</h3>
+                  <p className={styles.mobCardDesc}>{milestone.description}</p>
+                  
+                  <div className={styles.mobMetricsGrid}>
+                    {milestone.metrics.map((metric, i) => (
+                      <div key={i} className={styles.mobMetricItem}>
+                        <span className={styles.mobMetricLabel}>{metric.label}</span>
+                        <span className={styles.mobMetricValue}>{metric.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               );
             })}
           </div>
 
-          {/* Active Card Container with Fade Animation */}
-          <div key={activeIndex} className={cn(styles.mobCard, styles.mobCardActive)}>
-            <div className={styles.mobImageFrame}>
-              <div className={styles.svgWrapper}>
-                {milestones[activeIndex].svg}
-              </div>
-              <span className={styles.mobBadgeNum}>{`0${activeIndex + 1}`}</span>
-            </div>
-
-            <div className={styles.mobContent}>
-              <span className={styles.eyebrow}>{milestones[activeIndex].badge}</span>
-              <h3 className={styles.mobCardTitle}>{milestones[activeIndex].title}</h3>
-              <p className={styles.mobCardDesc}>{milestones[activeIndex].description}</p>
-
-              <div className={styles.mobCardFooter}>
-                {milestones[activeIndex].metrics.map((metric, i) => (
-                  <div key={i}>
-                    <span className={styles.metricLabel}>{metric.label}</span>
-                    <div
-                      className={cn(
-                        styles.metricValue,
-                        styles.tealHighlight,
-                        "text-sm"
-                      )}
-                    >
-                      {metric.value}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.mobControlsRow}>
-            {/* Pagination dots for mobile */}
-            <div className={styles.dotsRow}>
+          <div className={styles.mobileControls}>
+            <div className={styles.progressDots}>
               {milestones.map((_, i) => (
                 <button
                   key={i}
-                  aria-label={`Go to mobile slide ${i + 1}`}
-                  onClick={() => setActiveIndex(i)}
-                  className={cn(styles.dotButton, activeIndex === i && styles.active)}
-                  style={{ width: activeIndex === i ? "1.5rem" : "0.5rem" }}
+                  onClick={() => scrollMobileTo(i)}
+                  className={cn(
+                    styles.progressDot,
+                    activeIndex === i && styles.active
+                  )}
+                  style={{
+                    width: activeIndex === i ? 24 : 6,
+                    opacity: activeIndex === i ? 1 : 0.3
+                  }}
+                  aria-label={`Go to slide ${i + 1}`}
                 />
               ))}
-            </div>
-
-            <div className={styles.dotsRow}>
-              <button
-                onClick={() => setActiveIndex(Math.max(0, activeIndex - 1))}
-                disabled={activeIndex === 0}
-                className={styles.mobNavBtn}
-                aria-label="Previous Slide Mobile"
-              >
-                <ArrowLeft size={14} />
-              </button>
-              <button
-                onClick={() => setActiveIndex(Math.min(milestones.length - 1, activeIndex + 1))}
-                disabled={activeIndex === milestones.length - 1}
-                className={styles.mobNavBtn}
-                aria-label="Next Slide Mobile"
-              >
-                <ArrowRight size={14} />
-              </button>
             </div>
           </div>
         </div>

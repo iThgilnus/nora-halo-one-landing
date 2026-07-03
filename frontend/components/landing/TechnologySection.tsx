@@ -4,13 +4,8 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronDown, Cpu } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
 import styles from "./TechnologySection.module.scss";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const nodes = [
   {
@@ -54,62 +49,34 @@ export default function TechnologySection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  useGSAP(
-    () => {
-      const section = sectionRef.current;
-      if (!section) return;
+  // Desktop scroll progress tracking
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end end"],
+  });
 
-      const mm = gsap.matchMedia();
-
-      // Only pin on desktop viewports (lg and above: 1024px)
-      mm.add("(min-width: 1024px)", () => {
-        const trigger = ScrollTrigger.create({
-          trigger: section,
-          pin: true,
-          scrub: 0.6,
-          start: "top 72px",
-          end: "+=1500", // comfortable scroll distance
-          invalidateOnRefresh: true,
-          onUpdate: (self) => {
-            const progress = self.progress;
-            const index = Math.min(
-              Math.floor(progress * nodes.length),
-              nodes.length - 1
-            );
-            setActiveIndex(index);
-          }
-        });
-
-        return () => {
-          trigger.kill();
-        };
-      });
-
-      return () => {
-        mm.revert();
-      };
-    },
-    { scope: sectionRef }
-  );
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    const index = Math.min(
+      Math.floor(latest * nodes.length),
+      nodes.length - 1
+    );
+    setActiveIndex(index);
+  });
 
   const mobileTrackRef = useRef<HTMLDivElement>(null);
 
   const scrollToIndex = (index: number) => {
-    const trigger = ScrollTrigger.getAll().find(
-      st => st.vars.trigger === sectionRef.current && st.pin
-    );
-
-    if (trigger) {
-      const start = trigger.start;
-      const total = trigger.end - start;
-      const target = start + total * (index / (nodes.length - 1));
-      window.scrollTo({
-        top: target,
-        behavior: "smooth"
-      });
-    } else {
-      setActiveIndex(index);
-    }
+    const el = sectionRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const start = window.scrollY + rect.top;
+    const scrollableDist = el.clientHeight - window.innerHeight;
+    const target = start + scrollableDist * (index / (nodes.length - 1));
+    
+    window.scrollTo({
+      top: target,
+      behavior: "smooth"
+    });
   };
 
   const handleMobileScroll = () => {
@@ -258,6 +225,8 @@ export default function TechnologySection() {
                 fill
                 sizes="40vw"
                 className={styles.cutawayImage}
+                priority
+                unoptimized
               />
 
               {/* Sensor status bar — bottom overlay */}
@@ -310,6 +279,8 @@ export default function TechnologySection() {
               fill
               sizes="90vw"
               className={styles.mobileImage}
+              priority
+              unoptimized
             />
 
             {/* Sensor status bar overlay on image */}

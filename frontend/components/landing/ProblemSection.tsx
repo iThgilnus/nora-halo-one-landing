@@ -3,14 +3,9 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
+import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
 import { AlertTriangle } from "lucide-react";
 import styles from "./ProblemSection.module.scss";
-
-// Register ScrollTrigger plugin
-gsap.registerPlugin(ScrollTrigger);
 
 const painPoints = [
   {
@@ -44,188 +39,55 @@ const painPoints = [
 
 export function ProblemSection() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const pinWrapperRef = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<HTMLImageElement>(null);
-
-  // Desktop Card Refs
   const card1Ref = useRef<HTMLDivElement>(null);
   const card2Ref = useRef<HTMLDivElement>(null);
   const card3Ref = useRef<HTMLDivElement>(null);
 
-  // Desktop HUD Refs
-  const deskMeterFillRef = useRef<HTMLDivElement>(null);
-  const deskGaugeTextRef = useRef<HTMLSpanElement>(null);
-  const deskCircleFillRef = useRef<SVGCircleElement>(null);
-  const deskCircleTextRef = useRef<HTMLSpanElement>(null);
-  const deskStressTextRef = useRef<HTMLSpanElement>(null);
-
-  // Mobile HUD Refs
-  const mobMeterFillRef = useRef<HTMLDivElement>(null);
-  const mobGaugeTextRef = useRef<HTMLSpanElement>(null);
-  const mobCircleFillRef = useRef<SVGCircleElement>(null);
-  const mobCircleTextRef = useRef<HTMLSpanElement>(null);
-  const mobStressTextRef = useRef<HTMLSpanElement>(null);
-
   const [activeIndex, setActiveIndex] = useState(0);
 
-  useGSAP(() => {
-    const isDesktop = window.innerWidth >= 1024;
+  // Desktop Scroll-driven animations
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"],
+  });
 
-    if (isDesktop) {
-      gsap.set(containerRef.current, { height: "300vh" });
+  // Background image pan/zoom mapping
+  const imageScale = useTransform(scrollYProgress, [0, 0.5, 1], [1.1, 1.25, 1.12]);
+  const imageX = useTransform(scrollYProgress, [0, 0.5, 1], ["0%", "5%", "-6%"]);
+  const imageY = useTransform(scrollYProgress, [0, 0.5, 1], ["0%", "4%", "-5%"]);
 
-      // 1. Initial State for visual elements
-      gsap.set(imageRef.current, { scale: 1.1, xPercent: 0, yPercent: 0 });
-      gsap.set(deskCircleFillRef.current, { strokeDashoffset: 377 });
+  // Gauges values mapping (Desktop)
+  const ammoniaValue = useTransform(scrollYProgress, [0, 0.33], [15, 85]);
+  const ammoniaHeight = useTransform(scrollYProgress, [0, 0.33], ["15%", "85%"]);
 
-      // Create Desktop Timeline
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top top+=72",
-          end: "bottom bottom",
-          pin: pinWrapperRef.current,
-          scrub: 0.5,
-          onUpdate: (self) => {
-            const progress = self.progress;
-            const idx = Math.min(2, Math.floor(progress * 2.999));
-            setActiveIndex(idx);
-          }
-        }
-      });
+  const timeValue = useTransform(scrollYProgress, [0.33, 0.66], [0, 100]);
+  const circleOffset = useTransform(scrollYProgress, [0.33, 0.66], [377, 0]);
 
-      // --- CAM PAN ANIMATION ---
-      tl.to(imageRef.current, {
-        scale: 1.25,
-        xPercent: 5,
-        yPercent: 4,
-        duration: 1,
-        ease: "power2.inOut",
-      });
+  const stressValue = useTransform(scrollYProgress, [0.66, 1], [10, 95]);
 
-      tl.to(imageRef.current, {
-        scale: 1.12,
-        xPercent: -6,
-        yPercent: -5,
-        duration: 1,
-        ease: "power2.inOut",
-      });
+  // States to hold formatted string values for text nodes to avoid layout thrashing
+  const [ammoniaText, setAmmoniaText] = useState("15%");
+  const [timeText, setTimeText] = useState("0");
+  const [stressText, setStressText] = useState("10%");
 
-      // --- COMPLICATIONS ANIMATION ---
-      
-      // Step 1: Odor Vertical Fill (15% to 85%)
-      const ammoniaObj = { value: 15 };
-      tl.to(ammoniaObj, {
-        value: 85,
-        duration: 0.6,
-        ease: "power1.out",
-        onUpdate: () => {
-          if (deskGaugeTextRef.current) {
-            deskGaugeTextRef.current.innerText = `${Math.round(ammoniaObj.value)}%`;
-          }
-          if (deskMeterFillRef.current) {
-            deskMeterFillRef.current.style.height = `${ammoniaObj.value}%`;
-          }
-        }
-      }, 0);
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    // Determine active index
+    const idx = Math.min(2, Math.floor(latest * 2.999));
+    setActiveIndex(idx);
+  });
 
-      // Step 2: Time Circular Complication (+91 hrs)
-      const timeObj = { value: 0 };
-      tl.to(timeObj, {
-        value: 100,
-        duration: 0.8,
-        ease: "power1.inOut",
-        onUpdate: () => {
-          if (deskCircleFillRef.current) {
-            const offset = 377 - (377 * (timeObj.value / 100));
-            deskCircleFillRef.current.style.strokeDashoffset = `${offset}`;
-          }
-          if (deskCircleTextRef.current) {
-            const currentHours = Math.round((timeObj.value / 100) * 91);
-            deskCircleTextRef.current.innerText = `${currentHours}`;
-          }
-        }
-      }, 0.5);
+  useMotionValueEvent(ammoniaValue, "change", (latest) => {
+    setAmmoniaText(`${Math.round(latest)}%`);
+  });
 
-      // Step 3: Stress level text (10% to 95%)
-      const stressObj = { value: 10 };
-      tl.to(stressObj, {
-        value: 95,
-        duration: 0.8,
-        ease: "power1.inOut",
-        onUpdate: () => {
-          if (deskStressTextRef.current) {
-            deskStressTextRef.current.innerText = `${Math.round(stressObj.value)}%`;
-          }
-        }
-      }, 1.3);
+  useMotionValueEvent(timeValue, "change", (latest) => {
+    const hours = Math.round((latest / 100) * 91);
+    setTimeText(`${hours}`);
+  });
 
-    } else {
-      gsap.set(containerRef.current, { height: "auto" });
-
-      // Mobile Card 1: Vertical Level Fill
-      const mobAmmoniaObj = { value: 15 };
-      gsap.to(mobAmmoniaObj, {
-        value: 85,
-        duration: 1.5,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: card1Ref.current,
-          start: "top 80%",
-          toggleActions: "play none none reverse"
-        },
-        onUpdate: () => {
-          if (mobGaugeTextRef.current) {
-            mobGaugeTextRef.current.innerText = `${Math.round(mobAmmoniaObj.value)}%`;
-          }
-          if (mobMeterFillRef.current) {
-            mobMeterFillRef.current.style.height = `${mobAmmoniaObj.value}%`;
-          }
-        }
-      });
-
-      // Mobile Card 2: Circle Activity Ring Fill
-      const mobTimeObj = { value: 0 };
-      gsap.to(mobTimeObj, {
-        value: 100,
-        duration: 1.5,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: card2Ref.current,
-          start: "top 80%",
-          toggleActions: "play none none reverse"
-        },
-        onUpdate: () => {
-          if (mobCircleFillRef.current) {
-            const offset = 377 - (377 * (mobTimeObj.value / 100));
-            mobCircleFillRef.current.style.strokeDashoffset = `${offset}`;
-          }
-          if (mobCircleTextRef.current) {
-            const currentHours = Math.round((mobTimeObj.value / 100) * 91);
-            mobCircleTextRef.current.innerText = `${currentHours}`;
-          }
-        }
-      });
-
-      // Mobile Card 3: Stress level index
-      const mobStressObj = { value: 10 };
-      gsap.to(mobStressObj, {
-        value: 95,
-        duration: 1.5,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: card3Ref.current,
-          start: "top 80%",
-          toggleActions: "play none none reverse"
-        },
-        onUpdate: () => {
-          if (mobStressTextRef.current) {
-            mobStressTextRef.current.innerText = `${Math.round(mobStressObj.value)}%`;
-          }
-        }
-      });
-    }
-  }, { scope: containerRef });
+  useMotionValueEvent(stressValue, "change", (latest) => {
+    setStressText(`${Math.round(latest)}%`);
+  });
 
   const getGlowClass = () => {
     if (activeIndex === 0) return styles.glowOrange;
@@ -235,21 +97,26 @@ export function ProblemSection() {
 
   return (
     <div ref={containerRef} id="experience" className={styles.sectionContainer}>
-      <div ref={pinWrapperRef} className={styles.pinWrapper}>
+      <div className={styles.pinWrapper}>
         <div className={styles.gridContainer}>
           
-          {/* LEFT COLUMN: Minimalist watch-face canvas */}
+          {/* LEFT COLUMN: Minimalist watch-face canvas (Desktop Only) */}
           <div className={styles.visualColumn}>
             <div className={styles.visualFrame}>
-              <Image
-                ref={imageRef}
-                src="/assets/story/problem-manual-litter-lifestyle.webp"
-                alt="Manual litter cleaning struggle"
-                fill
-                sizes="45vw"
-                className={styles.backgroundImage}
-                priority
-              />
+              <motion.div
+                style={{ scale: imageScale, x: imageX, y: imageY }}
+                className="absolute inset-0 w-full h-full"
+              >
+                <Image
+                  src="/assets/story/problem-manual-litter-lifestyle.webp"
+                  alt="Manual litter cleaning struggle"
+                  fill
+                  sizes="45vw"
+                  className={styles.backgroundImage}
+                  priority
+                  unoptimized
+                />
+              </motion.div>
               <div className={styles.gradientOverlay} />
               
               {/* Ultra smooth atmospheric glow wash */}
@@ -260,10 +127,10 @@ export function ProblemSection() {
                 <div className={cn(styles.widgetPane, activeIndex === 0 && styles.active)}>
                   <div className={styles.verticalMeterWrapper}>
                     <div className={styles.verticalTrack}>
-                      <div ref={deskMeterFillRef} className={styles.verticalFill} />
+                      <motion.div style={{ height: ammoniaHeight }} className={styles.verticalFill} />
                     </div>
                     <span className={styles.compLabel}>Nồng độ khí độc</span>
-                    <span ref={deskGaugeTextRef} className={styles.compValue}>15%</span>
+                    <span className={styles.compValue}>{ammoniaText}</span>
                   </div>
                 </div>
 
@@ -272,8 +139,8 @@ export function ProblemSection() {
                   <div className={styles.circleComplication}>
                     <svg className={styles.circleSvg} viewBox="0 0 130 130">
                       <circle className={styles.circleTrack} cx="65" cy="65" r="60" />
-                      <circle
-                        ref={deskCircleFillRef}
+                      <motion.circle
+                        style={{ strokeDashoffset: circleOffset }}
                         className={styles.circleFill}
                         cx="65"
                         cy="65"
@@ -282,7 +149,7 @@ export function ProblemSection() {
                     </svg>
                     <div className={styles.circleText}>
                       <span className={styles.circleNum}>
-                        +<span ref={deskCircleTextRef}>0</span>
+                        +{timeText}
                       </span>
                       <span className={styles.compLabel} style={{ marginTop: '0.25rem' }}>Giờ / Năm</span>
                     </div>
@@ -308,7 +175,7 @@ export function ProblemSection() {
                     Chỉ số stress của Boss
                     <span className={styles.healthAlertDot} />
                   </span>
-                  <span ref={deskStressTextRef} className={styles.healthValue}>10%</span>
+                  <span className={styles.healthValue}>{stressText}</span>
                 </div>
               </div>
 
@@ -350,9 +217,15 @@ export function ProblemSection() {
                 <div className={styles.mobileComplication}>
                   <div className={styles.verticalMeterWrapper} style={{ transform: 'scale(0.85)' }}>
                     <div className={styles.verticalTrack} style={{ height: 100 }}>
-                      <div ref={mobMeterFillRef} className={styles.verticalFill} />
+                      <motion.div
+                        initial={{ height: "15%" }}
+                        whileInView={{ height: "85%" }}
+                        viewport={{ once: true, amount: 0.3 }}
+                        transition={{ duration: 1.2, ease: "easeOut" }}
+                        className={styles.verticalFill}
+                      />
                     </div>
-                    <span ref={mobGaugeTextRef} className={styles.compValue} style={{ fontSize: '1.5rem' }}>15%</span>
+                    <span className={styles.compValue} style={{ fontSize: '1.5rem' }}>85%</span>
                   </div>
                 </div>
 
@@ -382,8 +255,11 @@ export function ProblemSection() {
                   <div className={styles.circleComplication} style={{ width: 100, height: 100, marginBottom: 0 }}>
                     <svg className={styles.circleSvg} viewBox="0 0 130 130">
                       <circle className={styles.circleTrack} cx="65" cy="65" r="60" />
-                      <circle
-                        ref={mobCircleFillRef}
+                      <motion.circle
+                        initial={{ strokeDashoffset: 377 }}
+                        whileInView={{ strokeDashoffset: 0 }}
+                        viewport={{ once: true, amount: 0.3 }}
+                        transition={{ duration: 1.2, ease: "easeOut" }}
                         className={styles.circleFill}
                         cx="65"
                         cy="65"
@@ -392,7 +268,7 @@ export function ProblemSection() {
                     </svg>
                     <div className={styles.circleText}>
                       <span className={styles.circleNum} style={{ fontSize: '1.5rem' }}>
-                        +<span ref={mobCircleTextRef}>0</span>
+                        +91
                       </span>
                       <span className={styles.compLabel} style={{ fontSize: '0.5rem' }}>Giờ / Năm</span>
                     </div>
@@ -416,24 +292,29 @@ export function ProblemSection() {
                 )}
               >
                 <div className={styles.cardHeader}>
-                  <span className={styles.cardNum}>03 // BÁO ĐỘNG</span>
+                  <span className={styles.cardNum}>03 // SỨC KHỎE BOSS</span>
                   <h4 className={styles.cardTitle}>{painPoints[2].title}</h4>
                 </div>
 
                 {/* Mobile Inline Widget 3 */}
                 <div className={styles.mobileComplication}>
-                  <div className={styles.ecgWaveWrapper} style={{ width: 240, height: 75, marginBottom: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <svg className={styles.ecgSvg} viewBox="0 0 260 80" style={{ height: 50 }}>
-                      <path
-                        className={styles.ecgPath}
-                        d="M0,40 L60,40 L65,15 L70,65 L75,40 L120,40 L125,5 L132,75 L138,40 L180,40 L185,15 L190,65 L195,40 L260,40"
-                      />
-                      <path
-                        className={styles.ecgPathActive}
-                        d="M0,40 L60,40 L65,15 L70,65 L75,40 L120,40 L125,5 L132,75 L138,40 L180,40 L185,15 L190,65 L195,40 L260,40"
-                      />
-                    </svg>
-                    <span ref={mobStressTextRef} className={styles.healthValue} style={{ fontSize: '1.25rem', marginTop: '0.25rem' }}>10%</span>
+                  <div className={styles.widgetPane} style={{ opacity: 1, padding: 0 }}>
+                    <div className={styles.ecgWaveWrapper} style={{ height: 40, width: 160 }}>
+                      <svg className={styles.ecgSvg} viewBox="0 0 260 80">
+                        <path
+                          className={styles.ecgPath}
+                          d="M0,40 L60,40 L65,15 L70,65 L75,40 L120,40 L125,5 L132,75 L138,40 L180,40 L185,15 L190,65 L195,40 L260,40"
+                        />
+                        <motion.path
+                          initial={{ pathLength: 0 }}
+                          whileInView={{ pathLength: 1 }}
+                          viewport={{ once: true, amount: 0.3 }}
+                          transition={{ duration: 1.5, ease: "easeInOut" }}
+                          className={styles.ecgPathActive}
+                          d="M0,40 L60,40 L65,15 L70,65 L75,40 L120,40 L125,5 L132,75 L138,40 L180,40 L185,15 L190,65 L195,40 L260,40"
+                        />
+                      </svg>
+                    </div>
                   </div>
                 </div>
 
@@ -443,10 +324,9 @@ export function ProblemSection() {
                   <span className={styles.statLabel}>{painPoints[2].stat.label}</span>
                 </div>
               </div>
-
             </div>
-          </div>
 
+          </div>
         </div>
       </div>
     </div>
