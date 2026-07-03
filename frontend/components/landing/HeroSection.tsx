@@ -7,29 +7,7 @@ import Image from "next/image";
 import { ButtonLink } from "@/components/ui/Button";
 import styles from "./HeroSection.module.scss";
 
-// Split text into animatable word spans
-function SplitWords({ text, className, delay = 0 }: { text: string; className?: string; delay?: number }) {
-  const words = text.split(" ");
-  return (
-    <span className={className}>
-      {words.map((word, i) => (
-        <motion.span
-          key={`${word}-${i}`}
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            duration: 0.5,
-            delay: delay + i * 0.05,
-            ease: [0.16, 1, 0.3, 1],
-          }}
-          className={styles.splitWords}
-        >
-          {word}
-        </motion.span>
-      ))}
-    </span>
-  );
-}
+
 
 export function HeroSection() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -67,52 +45,40 @@ export function HeroSection() {
       >
         {/* Left Column: Content */}
         <div className={styles.textCol}>
-          <div className={styles.textContainer}>
-            {/* Status Badge — entrance */}
-            <motion.div
-              initial={{ opacity: 0, y: -12, scale: 0.94 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className={styles.statusBadge}
-            >
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className={styles.textContainer}
+          >
+            {/* Status Badge */}
+            <div className={styles.statusBadge}>
               <span className={styles.pingWrapper}>
                 <span className={styles.pingDotActive}></span>
                 <span className={styles.pingDotBase}></span>
               </span>
               Giám sát | Halo One trực tuyến
-            </motion.div>
+            </div>
 
             {/* Eyebrow */}
-            <motion.p
-              initial={{ opacity: 0, x: -16 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-              className={styles.eyebrow}
-            >
+            <p className={styles.eyebrow}>
               HỘP VỆ SINH MÈO TỰ ĐỘNG
-            </motion.p>
+            </p>
 
-            {/* Heading — split words */}
+            {/* Heading */}
             <h1 className={styles.heading}>
-              <SplitWords text="Sạch hơn mỗi ngày." delay={0.2} />
+              Sạch hơn mỗi ngày.
               <br />
-              <SplitWords
-                text="Nhẹ đầu hơn mỗi tối."
-                delay={0.45}
-                className={styles.highlightedText}
-              />
+              <span className={styles.highlightedText}>
+                Nhẹ đầu hơn mỗi tối.
+              </span>
             </h1>
 
             {/* Subtext */}
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.85, ease: [0.16, 1, 0.3, 1] }}
-              className={styles.subtext}
-            >
+            <p className={styles.subtext}>
               Tự động làm sạch, kiểm soát mùi và theo dõi an toàn — để bạn chăm
               mèo dễ dàng hơn mà không phải dọn khay cát liên tục.
-            </motion.p>
+            </p>
 
             {/* Action Buttons */}
             <div className={styles.actions}>
@@ -140,12 +106,7 @@ export function HeroSection() {
             </div>
 
             {/* Floating stats */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 1, delay: 1.4 }}
-              className={styles.statsRow}
-            >
+            <div className={styles.statsRow}>
               {[
                 { value: "10+", label: "Cảm biến" },
                 { value: "74L", label: "Khoang chứa" },
@@ -156,8 +117,8 @@ export function HeroSection() {
                   <p className={styles.statLabel}>{stat.label}</p>
                 </div>
               ))}
-            </motion.div>
-          </div>
+            </div>
+          </motion.div>
         </div>
 
         {/* Right Column: Image */}

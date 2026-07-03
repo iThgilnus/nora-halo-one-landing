@@ -2,10 +2,14 @@
 
 .sectionContainer {
   position: relative;
-  overflow: hidden;
+  overflow: visible; /* Allow sticky child overflow */
   background-color: #f5f3ec;
   transition: background-color 0.8s ease-out, color 0.3s ease;
   scroll-margin-top: 72px;
+
+  @include respond-to('lg') {
+    height: 300vh; /* Define 300vh scroll-track height */
+  }
 
   &.activeStep1 {
     background-color: #e9e8e1;
@@ -34,6 +38,8 @@
   
   @include respond-to('lg') {
     display: block;
+    position: sticky;
+    top: 72px;
     height: calc(100vh - 72px);
   }
 }

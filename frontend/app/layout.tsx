@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import { Lora, Be_Vietnam_Pro } from "next/font/google";
-import dynamic from "next/dynamic";
+import { ChatbotClient } from "@/components/chat/ChatbotClient";
 import "./globals.scss";
-
-const Chatbot = dynamic(() => import("@/components/chat/Chatbot").then(mod => mod.Chatbot), {
-  ssr: false,
-});
 
 const lora = Lora({
   variable: "--font-lora",
@@ -81,7 +77,7 @@ export default function RootLayout({
     >
       <body className="min-h-screen bg-page font-sans text-ink antialiased">
         {children}
-        <Chatbot />
+        <ChatbotClient />
       </body>
     </html>
   );
