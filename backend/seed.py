@@ -89,10 +89,15 @@ def seed_database():
     print("Đang kết nối và chuẩn bị ChromaDB...")
     persist_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "chroma_db")
     
-    # Xóa dữ liệu cũ nếu tồn tại thư mục chroma_db để tránh bị trùng lặp dữ liệu khi nạp lại
-    if os.path.exists(persist_dir):
-        print("Đang dọn dẹp cơ sở dữ liệu ChromaDB cũ...")
-        shutil.rmtree(persist_dir)
+    # Xóa dữ liệu cũ bên trong chroma_db mà không xóa chính Docker volume mount point.
+    os.makedirs(persist_dir, exist_ok=True)
+    print("Đang dọn dẹp cơ sở dữ liệu ChromaDB cũ...")
+    for item_name in os.listdir(persist_dir):
+        item_path = os.path.join(persist_dir, item_name)
+        if os.path.isdir(item_path) and not os.path.islink(item_path):
+            shutil.rmtree(item_path)
+        else:
+            os.remove(item_path)
         
     print("Đang sinh vector embeddings và nạp các đoạn văn bản vào ChromaDB (Quá trình này có thể mất vài giây)...")
     vector_store = Chroma.from_documents(
