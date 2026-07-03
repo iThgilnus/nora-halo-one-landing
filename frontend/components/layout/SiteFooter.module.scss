@@ -1,0 +1,173 @@
+@use "../../styles/mixins" as *;
+
+.footer {
+  background-color: #131614;
+  color: #fff;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 4rem 1rem;
+
+  @include respond-to('sm') {
+    padding: 4rem 1.5rem;
+  }
+  @include respond-to('lg') {
+    padding: 4rem 2rem;
+  }
+}
+
+.footerInner {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 1280px;
+}
+
+.topGrid {
+  display: grid;
+  gap: 2.5rem;
+  grid-template-columns: 1fr;
+  padding-bottom: 3rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  @include respond-to('md') {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.brandCol {
+  @include respond-to('md') {
+    grid-column: span 1 / span 1;
+  }
+}
+
+.brandLink {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 12px;
+}
+
+.brandIcon {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.05);
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: #14b8a6;
+}
+
+.brandName {
+  display: block;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  color: #fff;
+}
+
+.brandSub {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.brandDesc {
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  line-height: 1.5rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.sectionTitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #14b8a6;
+  margin-bottom: 1rem;
+}
+
+.navLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.navLink {
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: #14b8a6;
+  }
+}
+
+.contactInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.contactText {
+  font-size: 0.75rem;
+  line-height: 1.625;
+}
+
+.socialList {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.socialLink {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #14b8a6;
+    color: #14b8a6;
+  }
+}
+
+.bottomBar {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  line-height: 1.5rem;
+
+  @include respond-to('md') {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+}
+
+.disclaimer {
+  max-width: 48rem;
+}
+
+.disclaimerTitle {
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 0.5rem;
+}
+
+.copyright {
+  flex-shrink: 0;
+}

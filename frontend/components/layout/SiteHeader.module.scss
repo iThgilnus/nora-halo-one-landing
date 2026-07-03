@@ -1,0 +1,398 @@
+@use "../../styles/mixins" as *;
+
+.headerContainer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 50;
+  transition: all 0.3s ease-in-out;
+  border-bottom: 1px solid transparent;
+  background-color: transparent;
+
+  &.scrolled {
+    border-bottom-color: color-mix(in srgb, var(--line) 40%, transparent);
+    background-color: color-mix(in srgb, #f7f4ee 88%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+
+    :global(.dark) & {
+      background-color: color-mix(in srgb, #0b0e0d 88%, transparent);
+    }
+  }
+}
+
+.progressBar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  transform-origin: left;
+  background: linear-gradient(to right, var(--teal), var(--accent-lime), var(--teal));
+}
+
+.innerContainer {
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  height: 72px;
+  max-width: 1280px;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 1rem;
+  padding-right: 1rem;
+
+  @include respond-to('sm') {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  @include respond-to('lg') {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Left: Logo */
+.logoLink {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: var(--radius-card);
+  
+  &:focus-visible {
+    outline: 2px solid var(--accent-lime);
+    outline-offset: 4px;
+  }
+}
+
+.logoBadge {
+  position: relative;
+  display: grid;
+  height: 2.25rem;
+  width: 2.25rem;
+  place-items: center;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--line);
+  background-color: var(--surface);
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: var(--accent-lime);
+  transition: all 0.3s ease;
+
+  .logoLink:hover & {
+    border-color: var(--accent-lime);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--teal) 35%, transparent);
+  }
+
+  .glowBg {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-card);
+    background-color: color-mix(in srgb, var(--accent-lime) 10%, transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+
+    .logoLink:hover & {
+      opacity: 1;
+    }
+  }
+}
+
+.logoTextContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.logoText {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
+
+  .logoLink:hover & {
+    color: var(--accent-lime);
+  }
+}
+
+.logoSub {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* Middle: Desktop Nav */
+.navContainer {
+  display: none;
+  align-items: center;
+  gap: 1.75rem;
+
+  @include respond-to('lg') {
+    display: flex;
+  }
+}
+
+.navLink {
+  position: relative;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: color 0.2s ease;
+  color: var(--text-secondary);
+
+  &:hover {
+    color: var(--text-primary);
+  }
+
+  &.active {
+    color: var(--text-primary);
+    
+    :global(.dark) & {
+      color: var(--white);
+    }
+  }
+
+  :global(.dark) &:not(.active) {
+    color: color-mix(in srgb, var(--white) 70%, transparent);
+
+    &:hover {
+      color: var(--white);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-lime);
+    outline-offset: 4px;
+  }
+}
+
+.underlineSweep {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  border-radius: 9999px;
+  background-color: var(--teal);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  width: 0;
+  opacity: 0;
+
+  .navLink.active & {
+    width: 100%;
+    opacity: 1;
+  }
+
+  .navLink:hover:not(.active) & {
+    width: 100%;
+    opacity: 1;
+  }
+}
+
+/* Right: Actions */
+.actionsContainer {
+  display: none;
+  align-items: center;
+  gap: 0.75rem;
+
+  @include respond-to('lg') {
+    display: flex;
+  }
+}
+
+.themeToggle {
+  position: relative;
+  display: grid;
+  height: 2.5rem;
+  width: 2.5rem;
+  place-items: center;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--line);
+  background-color: var(--surface);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--accent-lime);
+    background-color: var(--surface-soft);
+    color: var(--accent-lime);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-lime);
+    outline-offset: 2px;
+  }
+
+  .sunIcon, .moonIcon {
+    position: absolute;
+    transition: all 0.3s ease;
+  }
+}
+
+.ctaButton {
+  display: inline-flex;
+  min-height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-card);
+  background-color: var(--teal);
+  padding: 0 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #fff;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+
+  :global(.dark) & {
+    color: var(--charcoal);
+  }
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--teal) 90%, transparent);
+    color: #fff;
+    transform: scale(1.03);
+    box-shadow: 0 0 20px color-mix(in srgb, var(--teal) 40%, transparent);
+
+    :global(.dark) & {
+      color: var(--charcoal);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-lime);
+    outline-offset: 2px;
+  }
+}
+
+/* Mobile Menu Trigger & Controls */
+.mobileControls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  @include respond-to('lg') {
+    display: none;
+  }
+}
+
+.mobileToggle {
+  position: relative;
+  display: grid;
+  height: 2.5rem;
+  width: 2.5rem;
+  place-items: center;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--line);
+  background-color: var(--surface);
+  color: var(--text-primary);
+  overflow: hidden;
+
+  .sunIcon, .moonIcon {
+    position: absolute;
+    transition: all 0.3s ease;
+  }
+}
+
+.mobileTrigger {
+  position: relative;
+  display: grid;
+  height: 2.5rem;
+  width: 2.5rem;
+  place-items: center;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--line);
+  background-color: var(--surface);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: var(--accent-lime);
+  }
+
+  .menuIcon, .closeIcon {
+    position: absolute;
+    transition: all 0.2s ease;
+  }
+}
+
+/* Mobile Drawer */
+.mobileDrawer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 72px;
+  z-index: 40;
+  transform-origin: top;
+  border-bottom: 1px solid var(--line);
+  background-color: var(--bg);
+  padding: 0.75rem 1rem 1.5rem;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+  transition: all 0.3s ease;
+  transform: scaleY(0.95);
+  opacity: 0;
+  pointer-events: none;
+
+  &.open {
+    transform: scaleY(1);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  @include respond-to('lg') {
+    display: none;
+  }
+}
+
+.mobileNav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mobileNavLink {
+  display: block;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--line);
+  background-color: var(--surface);
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+
+  &.active {
+    border-color: color-mix(in srgb, var(--accent-lime) 40%, transparent);
+    background-color: color-mix(in srgb, var(--accent-lime) 5%, transparent);
+  }
+
+  &:hover:not(.active) {
+    border-color: color-mix(in srgb, var(--accent-lime) 30%, transparent);
+  }
+}
+
+.mobileCta {
+  margin-top: 0.5rem;
+  display: inline-flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-card);
+  background-color: var(--teal);
+  padding: 0 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #fff;
+
+  :global(.dark) & {
+    color: var(--charcoal);
+  }
+}
