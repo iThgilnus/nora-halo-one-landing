@@ -72,6 +72,9 @@
   }
 
   @include respond-to('lg') {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) auto minmax(220px, 1fr);
+    gap: 2.5rem;
     padding-left: 2rem;
     padding-right: 2rem;
   }
@@ -103,6 +106,11 @@
   border-radius: var(--radius-card);
   flex: 1 1 auto;
   min-width: 0;
+
+  @include respond-to('lg') {
+    justify-self: start;
+    flex: 0 0 auto;
+  }
   
   &:focus-visible {
     outline: 2px solid var(--accent-lime);
@@ -181,6 +189,8 @@
 
   @include respond-to('lg') {
     display: flex;
+    justify-self: center;
+    gap: clamp(2rem, 3vw, 3.25rem);
   }
 }
 
@@ -245,10 +255,12 @@
 .actionsContainer {
   display: none;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.875rem;
 
   @include respond-to('lg') {
     display: flex;
+    justify-self: end;
+    margin-left: 0.75rem;
   }
 }
 

@@ -100,33 +100,11 @@ function DesignSvg() {
 function TechSvg() {
   return (
     <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <radialGradient id="radarCone" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.4" />
-          <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-
       {/* Machine silhouette base */}
       <rect x="130" y="100" width="140" height="200" rx="70" stroke="rgba(14, 165, 233, 0.2)" strokeWidth="1" />
 
-      {/* Active Radar Sweep Cone Group (rotating 360deg around center) */}
-      <motion.g
-        className="radarScanGroup"
-        style={{ transformOrigin: "200px 200px" }}
-        animate={{ rotate: 360 }}
-        transition={{ repeat: Infinity, duration: 3.5, ease: "linear" }}
-      >
-        <path
-          className="radarScanCone"
-          d="M 200 200 L 200 80 A 120 120 0 0 1 284.85 115.15 Z"
-          fill="url(#radarCone)"
-          opacity="0.65"
-        />
-      </motion.g>
-
       {/* Concentric Guard Shields */}
-      <motion.circle
+      <circle
         className="shieldRing1"
         cx="200"
         cy="200"
@@ -135,11 +113,8 @@ function TechSvg() {
         strokeWidth="1.2"
         strokeDasharray="6 6"
         opacity="0.85"
-        style={{ transformOrigin: "200px 200px" }}
-        animate={{ rotate: 360 }}
-        transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
       />
-      <motion.circle
+      <circle
         className="shieldRing2"
         cx="200"
         cy="200"
@@ -148,11 +123,8 @@ function TechSvg() {
         strokeWidth="1"
         strokeDasharray="12 8"
         opacity="0.65"
-        style={{ transformOrigin: "200px 200px" }}
-        animate={{ rotate: -360 }}
-        transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
       />
-      <motion.circle
+      <circle
         className="shieldRing3"
         cx="200"
         cy="200"
@@ -161,19 +133,6 @@ function TechSvg() {
         strokeWidth="1"
         strokeDasharray="4 4"
         opacity="0.45"
-        style={{ transformOrigin: "200px 200px" }}
-        animate={{ rotate: 360 }}
-        transition={{ repeat: Infinity, duration: 32, ease: "linear" }}
-      />
-
-      {/* Pulse Radar Wave */}
-      <motion.circle
-        cx="200"
-        cy="200"
-        stroke="#0ea5e9"
-        strokeWidth="1.5"
-        animate={{ r: [40, 110], opacity: [0.8, 0] }}
-        transition={{ repeat: Infinity, duration: 1.8, ease: "easeOut" }}
       />
 
       {/* Embedded sensors blinking */}
