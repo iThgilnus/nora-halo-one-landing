@@ -288,3 +288,5 @@ export function LeadFormSection() {
     </section>
   );
 }
+
+// validated by client-side validation logic
