@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { Lora, Be_Vietnam_Pro } from "next/font/google";
-import { Chatbot } from "@/components/chat/Chatbot";
+import dynamic from "next/dynamic";
 import "./globals.scss";
+
+const Chatbot = dynamic(() => import("@/components/chat/Chatbot").then(mod => mod.Chatbot), {
+  ssr: false,
+});
 
 const lora = Lora({
   variable: "--font-lora",
@@ -45,7 +49,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/images/nora-halo-one-hero.webp",
+        url: "/assets/hero/hero-main-product-lifestyle.webp",
         width: 1710,
         height: 966,
         alt: "NORA Halo One concept smart cat care station in a modern home",
@@ -57,7 +61,7 @@ export const metadata: Metadata = {
     title: "NORA Halo One",
     description:
       "An original concept product experience for a smart cat care station.",
-    images: ["/images/nora-halo-one-hero.webp"],
+    images: ["/assets/hero/hero-main-product-lifestyle.webp"],
   },
 };
 

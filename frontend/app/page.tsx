@@ -1,18 +1,39 @@
 import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 import { SiteHeader } from "@/components/layout/SiteHeader";
-import SiteFooter from "@/components/layout/SiteFooter";
 import { HeroSection } from "@/components/landing/HeroSection";
-import { ProblemSection } from "@/components/landing/ProblemSection";
-import { SolutionRevealSection } from "@/components/landing/SolutionRevealSection";
+import dynamic from "next/dynamic";
 
-// Import S04 - S08 components
-import TechnologySection from "@/components/landing/TechnologySection";
-import FeatureCardsSection from "@/components/landing/FeatureCardsSection";
-import PetExperienceSection from "@/components/landing/PetExperienceSection";
-import { SpecsSection } from "@/components/landing/SpecsSection";
-import { FaqSection } from "@/components/landing/FaqSection";
-import FinalCtaSection from "@/components/landing/FinalCtaSection";
-import { LeadFormSection } from "@/components/sections/LeadFormSection";
+// Dynamic imports for below-the-fold components and footer
+const ProblemSection = dynamic(() =>
+  import("@/components/landing/ProblemSection").then((mod) => mod.ProblemSection)
+);
+const SolutionRevealSection = dynamic(() =>
+  import("@/components/landing/SolutionRevealSection").then(
+    (mod) => mod.SolutionRevealSection
+  )
+);
+const TechnologySection = dynamic(() =>
+  import("@/components/landing/TechnologySection")
+);
+const FeatureCardsSection = dynamic(() =>
+  import("@/components/landing/FeatureCardsSection")
+);
+const PetExperienceSection = dynamic(() =>
+  import("@/components/landing/PetExperienceSection")
+);
+const SpecsSection = dynamic(() =>
+  import("@/components/landing/SpecsSection").then((mod) => mod.SpecsSection)
+);
+const FaqSection = dynamic(() =>
+  import("@/components/landing/FaqSection").then((mod) => mod.FaqSection)
+);
+const LeadFormSection = dynamic(() =>
+  import("@/components/sections/LeadFormSection").then((mod) => mod.LeadFormSection)
+);
+const FinalCtaSection = dynamic(() =>
+  import("@/components/landing/FinalCtaSection")
+);
+const SiteFooter = dynamic(() => import("@/components/layout/SiteFooter"));
 
 
 export default function Home() {
